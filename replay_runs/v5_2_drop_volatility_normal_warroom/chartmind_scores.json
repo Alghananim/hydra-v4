@@ -1,0 +1,46 @@
+{
+  "rows_parsed": 99298,
+  "setup_type_counts": {
+    "no_setup": 88881,
+    "breakout": 8050,
+    "retest": 1243,
+    "pullback_in_trend": 1066
+  },
+  "chart_dir_counts": {
+    "none": 88881,
+    "short": 4805,
+    "long": 5554
+  },
+  "score_distribution": {
+    "0": 50577,
+    "3": 18953,
+    "4": 18846,
+    "5": 4505,
+    "2": 5644,
+    "6": 381,
+    "1": 288,
+    "7": 46
+  },
+  "score_avg_by_dir": {
+    "short": 2.031841831425598,
+    "long": 2.2099387828592008
+  },
+  "trend_distribution": {
+    "choppy": 82462,
+    "bearish_weak": 6522,
+    "bullish_weak": 7291,
+    "transitioning": 2110,
+    "bullish_strong": 81,
+    "range": 676,
+    "bearish_strong": 98
+  },
+  "volatility_distribution": {
+    "dangerous": 6834,
+    "expanded": 12399,
+    "normal": 51651,
+    "compressed": 28356
+  },
+  "mtf_distribution": {
+    "single_tf": 99240
+  }
+}

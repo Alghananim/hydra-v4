@@ -1,0 +1,18 @@
+{
+  "label": "v5_2_drop_volatility_normal",
+  "hypothesis": "Removing the `volatility_normal` evidence flag will increase ENTER_CANDIDATE count without materially worsening win rate, because ATR-percentile is orthogonal to setup quality.",
+  "expected_enter_direction": "up",
+  "expected_winrate_direction": "flat",
+  "risk_if_wrong": "More setups during compressed volatility (ATR \u226425 percentile) may hit SL before TP when volatility expands. Watch DD.",
+  "promotion_criteria": [
+    "ENTER count > 53 (V5.0 baseline) AND",
+    "win rate (excl timeout) >= 30 % AND",
+    "no per-pair regression (USD/JPY net pips not worse than baseline) AND",
+    "Red Team 8/8 pass."
+  ],
+  "rejection_triggers": [
+    "win rate (excl timeout) < 25 % OR",
+    "USD/JPY net pips below baseline by > 50 pips OR",
+    "drawdown / net pips ratio > 0.6."
+  ]
+}
