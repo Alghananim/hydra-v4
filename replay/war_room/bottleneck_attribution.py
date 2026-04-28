@@ -37,6 +37,8 @@ GRADE_ORDER = {"A+": 0, "A": 1, "B": 2, "C": 3, "D": 4, "F": 5, "BLOCK": 99}
 
 
 def _iter_cycles(cycles_path: Path) -> Iterator[Dict[str, Any]]:
+    if not cycles_path.exists():
+        return
     with cycles_path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()

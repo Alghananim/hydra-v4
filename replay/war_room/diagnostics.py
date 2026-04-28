@@ -26,6 +26,12 @@ from typing import Any, Dict, Iterable, Iterator, Tuple
 
 
 def _iter_cycles(cycles_path: Path) -> Iterator[Dict[str, Any]]:
+    # Fail-safe: if the file is missing (e.g. backtest never produced
+    # any output), yield nothing rather than crashing. The downstream
+    # report will then show empty counts and the runner will continue
+    # to write the report skeleton with placeholders.
+    if not cycles_path.exists():
+        return
     with cycles_path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
