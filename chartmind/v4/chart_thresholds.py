@@ -101,7 +101,11 @@ INVALIDATION_FALLBACK_ATR_MULT = 2.0   # invalidation = anchor ± 2.0 × ATR fal
 # ---------------------------------------------------------------------------
 # RULE 8 — Additive evidence ladder for grade
 # ---------------------------------------------------------------------------
-GRADE_A_PLUS_MIN_EVIDENCE = 6    # of 8
+# V2-W1 + V2-W4: 9 + 4 evidence flags (was 8). Thresholds keep the same
+# absolute counts; this loosens grade reachability proportionally
+# (5/13 = 38.5% for A vs old 5/8 = 62.5%) which is the V2 intent —
+# more cycles graduate to A, more setups become tradeable.
+GRADE_A_PLUS_MIN_EVIDENCE = 7    # of 13
 GRADE_A_MIN_EVIDENCE = 5
 GRADE_B_MIN_EVIDENCE = 3
 # C = 1..2; BLOCK = 0 OR data bad OR upstream block
@@ -115,6 +119,13 @@ EVIDENCE_KEYS = (
     "mtf_aligned",
     "volatility_normal",
     "no_liquidity_sweep",
+    # V2-W4: market direction confirms chart direction
+    "market_directional_alignment",
+    # V2-W1: additional setup detectors
+    "inside_bar_breakout",
+    "range_break",
+    "mean_reversion_at_level",
+    "momentum_thrust",
 )
 
 

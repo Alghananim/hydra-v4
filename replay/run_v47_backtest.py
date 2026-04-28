@@ -46,12 +46,24 @@ def parse_iso(s: str) -> datetime:
     return datetime.fromisoformat(s).astimezone(timezone.utc)
 
 
-def to_bar(d: dict) -> Bar:
+# V12-F1: per-pair pip size. The hardcoded *10000 broke USD/JPY:
+# JPY pairs quote to 2 decimals (pip = 0.01), so spread_pips was
+# inflated by 100x — every JPY bar tripped MarketMind's liquidity
+# spread_anomaly check. Net: USD/JPY systematically blocked.
+_PIP_SIZE = {
+    "EUR_USD": 0.0001, "GBP_USD": 0.0001, "AUD_USD": 0.0001,
+    "USD_CHF": 0.0001, "USD_CAD": 0.0001, "NZD_USD": 0.0001,
+    "USD_JPY": 0.01,   "EUR_JPY": 0.01,   "GBP_JPY": 0.01,
+}
+
+
+def to_bar(d: dict, pair: str = "EUR_USD") -> Bar:
     dt = parse_iso(d["time"])
     mid = d["mid"]
+    pip = _PIP_SIZE.get(pair, 0.0001)
     spread = 0.0
     try:
-        spread = max(0.0, (float(d["ask"]["c"]) - float(d["bid"]["c"])) * 10000)
+        spread = max(0.0, (float(d["ask"]["c"]) - float(d["bid"]["c"])) / pip)
     except Exception:
         pass
     return Bar(
@@ -72,7 +84,8 @@ def load_bars(pair: str) -> list:
         for line in f:
             line = line.strip()
             if line:
-                bars.append(to_bar(json.loads(line)))
+                # V12-F1: pass pair to to_bar so JPY spreads are right.
+                bars.append(to_bar(json.loads(line), pair))
     bars.sort(key=lambda b: b.timestamp)
     return bars
 
@@ -100,16 +113,27 @@ def cycle_to_record(c) -> dict:
                 break
             ev_truncated.append(s)
             budget -= len(s) + 1  # +1 for separator
-        return {
+        out = {
             "brain": b.brain_name,
             "decision": b.decision,
             "grade": b.grade.value,
             "data_quality": b.data_quality,
             "should_block": b.should_block,
             "evidence_count": len(b.evidence),
-            "evidence": ev_truncated,  # NEW in V5.1
+            "evidence": ev_truncated,
             "confidence": float(b.confidence),
         }
+        # V12-F6: persist ChartMind's references so the pnl simulator
+        # and shadow_pnl can use real ATR-based stops/targets instead
+        # of the V5 fixed 10/20-pip simulator. Only ChartMind has
+        # these fields; News/Market expose getattr(...) → None.
+        for k in ("invalidation_level", "stop_reference",
+                  "target_reference", "setup_anchor", "entry_zone",
+                  "atr_value", "setup_type"):
+            v = getattr(b, k, None)
+            if v is not None:
+                out[k] = v
+        return out
 
     direction = None
     if c.gate_decision is not None:
@@ -210,8 +234,11 @@ def main() -> None:
             idx = bar_index[symbol].get(now_utc)
             if idx is None:
                 continue
-            lo = max(0, idx + 1 - args.lookback_bars)
-            visible = bars_by_pair[symbol][lo:idx + 1]
+            # V2-W5 (no-lookahead): timeline[ti] is OPEN time of bar idx.
+            # At now_utc, bar idx has not yet closed; including it leaks future
+            # close into ChartMind. Visible window = bars STRICTLY before idx.
+            lo = max(0, idx - args.lookback_bars)
+            visible = bars_by_pair[symbol][lo:idx]
             if not visible:
                 continue
             try:

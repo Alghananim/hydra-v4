@@ -1,0 +1,179 @@
+name: HYDRA V2 — Deep Brain Redesign Backtest
+
+# HYDRA V2 backtest. Same V4.7 runner, but the brain code now contains
+# the 5 V2 fixes (W1: 5 new setup detectors, W2: loosened strong_trend,
+# W3: real H1 MTF, W4: hidden-cap → evidence flag, W5: no-lookahead).
+# Output goes to replay_runs/v2_2y/ — a clean directory so V2 baseline
+# is not contaminated with V5 state.
+#
+# Live trading is DISABLED. No OANDA API calls. No secrets needed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      time_budget_s:
+        description: "Per-chunk wall-clock budget (seconds)"
+        default: "300"
+        type: string
+      max_chunks:
+        description: "Maximum chunks before giving up (0 = unbounded)"
+        default: "60"
+        type: string
+      fresh_start:
+        description: "Wipe replay_runs/v2_2y/ before starting"
+        default: "true"
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  v2_full_pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest pyyaml
+
+      - name: Show free disk
+        run: df -h
+
+      - name: Verify cached data exists
+        run: |
+          ls -la data_cache/EUR_USD/M15/merged.jsonl
+          ls -la data_cache/USD_JPY/M15/merged.jsonl
+          wc -l data_cache/EUR_USD/M15/merged.jsonl
+          wc -l data_cache/USD_JPY/M15/merged.jsonl
+
+      - name: Sanity import V2 modules
+        run: |
+          PYTHONPATH=. python - <<'PY'
+          from chartmind.v4 import setups_v2, multi_timeframe, news_market_integration, ChartMindV4
+          from chartmind.v4.chart_thresholds import EVIDENCE_KEYS, GRADE_A_PLUS_MIN_EVIDENCE, GRADE_A_MIN_EVIDENCE
+          assert len(EVIDENCE_KEYS) == 13, f"V2 expects 13 evidence keys, got {len(EVIDENCE_KEYS)}"
+          assert "market_directional_alignment" in EVIDENCE_KEYS
+          assert "inside_bar_breakout" in EVIDENCE_KEYS
+          assert "range_break" in EVIDENCE_KEYS
+          assert "mean_reversion_at_level" in EVIDENCE_KEYS
+          assert "momentum_thrust" in EVIDENCE_KEYS
+          for fn in ("detect_inside_bar","detect_range_break","detect_mean_reversion","detect_momentum_thrust","detect_opening_range_break"):
+              assert hasattr(setups_v2, fn), fn
+          print("V2 SANITY OK: 13 evidence keys, 5 detectors, A+=", GRADE_A_PLUS_MIN_EVIDENCE, "A=", GRADE_A_MIN_EVIDENCE)
+          PY
+
+      - name: Run unit tests (sanity)
+        continue-on-error: true
+        run: |
+          PYTHONPATH=. python -m pytest gatemind/v4/tests --tb=line -q --no-header
+
+      - name: Wipe v2 output dir if fresh_start=true
+        if: ${{ inputs.fresh_start == 'true' }}
+        run: |
+          rm -rf replay_runs/v2_2y
+          mkdir -p replay_runs/v2_2y
+          echo "Wiped v2_2y for fresh baseline."
+
+      - name: Run resumable 2-year V2 backtest until DONE
+        env:
+          TIME_BUDGET_S: ${{ inputs.time_budget_s || '300' }}
+          MAX_CHUNKS: ${{ inputs.max_chunks || '60' }}
+        run: |
+          set -e
+          mkdir -p replay_runs/v2_2y
+          OUT=replay_runs/v2_2y
+          CHUNK=0
+          while [ ! -f "$OUT/DONE" ] ; do
+            CHUNK=$((CHUNK + 1))
+            if [ "$MAX_CHUNKS" != "0" ] && [ "$CHUNK" -gt "$MAX_CHUNKS" ] ; then
+              echo "Hit MAX_CHUNKS=$MAX_CHUNKS without DONE; stopping."
+              break
+            fi
+            echo "=== V2 chunk $CHUNK ==="
+            PYTHONPATH=. python replay/run_v47_backtest.py \
+              --output-dir "$OUT" \
+              --time-budget-s "$TIME_BUDGET_S" \
+              --checkpoint-every 1000
+          done
+          echo "--- V2 backtest state ---"
+          cat "$OUT/state.json" || true
+
+      - name: Run War Room investigation on V2 cycles
+        if: always()
+        run: |
+          PYTHONPATH=. python -m replay.war_room.run_war_room \
+            --cycles replay_runs/v2_2y/cycles.jsonl \
+            --data-cache data_cache \
+            --out-dir replay_runs/v2_warroom \
+            --repo-root . || true
+
+      - name: Show V2 summary
+        if: always()
+        run: |
+          echo "=== state.json ==="
+          cat replay_runs/v2_2y/state.json || true
+          echo ""
+          echo "=== war room manifest ==="
+          ls -la replay_runs/v2_warroom/ || true
+          echo ""
+          echo "=== ENTER count and counters ==="
+          if [ -f replay_runs/v2_2y/state.json ]; then
+            python - <<'PY'
+          import json, sys
+          try:
+              s = json.load(open("replay_runs/v2_2y/state.json"))
+              cs = s.get("counters", {})
+              total = cs.get("total", 0) or 1
+              enter = cs.get("ENTER_CANDIDATE", 0)
+              days = total / (96 * 2)
+              tpd = enter / days if days > 0 else 0
+              print(f"total_cycles={total} ENTER={enter} trades_per_day={tpd:.3f}")
+              print(f"target=2.0/day; ratio={tpd/2.0:.3f}")
+          except Exception as e:
+              print("summary_failed:", e)
+          PY
+          fi
+
+      - name: Upload V2 artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hydra-v2-results
+          path: |
+            replay_runs/v2_2y/
+            replay_runs/v2_warroom/
+
+      - name: Commit V2 results back to repo
+        if: always()
+        run: |
+          git config user.name "hydra-v2-bot"
+          git config user.email "hydra-v2-bot@users.noreply.github.com"
+          git add replay_runs/v2_2y/state.json replay_runs/v2_2y/summary.json replay_runs/v2_2y/DONE 2>/dev/null || true
+          git add replay_runs/v2_warroom/*.md replay_runs/v2_warroom/*.json 2>/dev/null || true
+          git diff --cached --stat
+          if git diff --cached --quiet ; then
+            echo "No tracked changes to commit."
+            exit 0
+          fi
+          git commit -m "hydra V2 baseline: backtest + war room results"
+          for i in 1 2 3 4 5 ; do
+            git fetch origin main
+            git pull --rebase origin main || git rebase --abort || true
+            if git push origin main ; then exit 0 ; fi
+            sleep 10
+          done
+          echo "V2 push failed."
+          exit 1

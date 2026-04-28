@@ -1,13 +1,21 @@
 """Reference levels — entry_zone (BAND), invalidation, stop, target.
 
-THE V3 SIN we are fixing:
-    `last_close * 1.0002` — a hardcoded scalar entry. REJECTED.
+V12 redesign per audit:
+    The audit found that V5's invalidation_level was tied to the nearest
+    structural swing. For M15 with sparse swings this often placed the
+    stop too tight (well within 1×ATR) → premature stop-outs.
+    V12-F4 replaces it with an ATR-based stop: invalidation = anchor ±
+    STOP_ATR_MULT × ATR. This adapts to instrument volatility (USD/JPY
+    auto-widens because its ATR is naturally larger in price units).
 
-V4 contract:
-- entry_zone is ALWAYS a band (low, high) derived from real ATR + real bars.
-- invalidation_level is a real price beyond a structural swing.
-- stop_reference == invalidation_level (set by the caller).
-- target_reference is the next opposing key level OR None (NOT a fixed RR).
+    Targets in V5 were "next opposing key level OR None". When `None`,
+    the trade timed out — wins were truncated.
+    V12-F5 enforces a 2:1 RR floor: target = anchor ± max(level_distance,
+    2 × stop_distance), so every trade has a real take-profit at minimum
+    twice the stop distance. Improves expected value at the same WR.
+
+V4 contract preserved: entry_zone is a band, invalidation_level is a
+price, target_reference is a price (no longer None).
 """
 from __future__ import annotations
 
@@ -26,6 +34,15 @@ from chartmind.v4.models import Level
 from chartmind.v4.market_structure import find_swings_adaptive
 
 
+# V12-F4: ATR-based stop. 1.5x is the industry standard for momentum +
+# breakout setups on M15 — wide enough to absorb noise, tight enough
+# to keep RR meaningful.
+STOP_ATR_MULT = 1.5
+# V12-F5: minimum risk:reward floor. Every trade must have target
+# distance ≥ 2x stop distance.
+RR_FLOOR = 2.0
+
+
 @dataclass
 class References:
     entry_zone: Dict[str, float]
@@ -38,32 +55,41 @@ def _make_band(center: float, half_width: float) -> Dict[str, float]:
     return {"low": float(center - half_width), "high": float(center + half_width)}
 
 
+def _atr_stop_and_target(anchor: float, atr_value: float, side: str,
+                          levels: List[Level]) -> tuple:
+    """V12 helper: ATR stop + RR-floor target. Returns (stop, target).
+
+    side='long' → stop below anchor, target above.
+    side='short' → stop above anchor, target below.
+    """
+    stop_distance = STOP_ATR_MULT * atr_value
+    rr_target_distance = RR_FLOOR * stop_distance
+    if side == "long":
+        stop = anchor - stop_distance
+        # Prefer a real resistance level above anchor IF it is at least
+        # rr_target_distance away. Otherwise enforce the RR floor.
+        ups = [L.price for L in levels
+               if L.price >= anchor + rr_target_distance and L.type == "resistance"]
+        target = float(min(ups)) if ups else float(anchor + rr_target_distance)
+    else:  # short
+        stop = anchor + stop_distance
+        downs = [L.price for L in levels
+                 if L.price <= anchor - rr_target_distance and L.type == "support"]
+        target = float(max(downs)) if downs else float(anchor - rr_target_distance)
+    return float(stop), target
+
+
 def for_breakout(bars: Sequence[Bar], *,
                  atr_value: float,
                  levels: List[Level],
                  side: str) -> References:
-    """Breakout entry band: ± 0.2 × ATR around last close.
-
-    Invalidation = nearest opposite swing (low for long / high for short).
-    Target = next opposing key level beyond the breakout direction, or None.
+    """V12: breakout entry = last close ± 0.2×ATR band.
+    Stop = anchor ± 1.5×ATR. Target = max(nearest level, anchor ± 2×stop).
     """
     last = bars[-1].close
     half = ENTRY_BAND_BREAKOUT_ATR * atr_value
     band = _make_band(last, half)
-    swings = find_swings_adaptive(bars)
-    if side == "long":
-        opp = next((s.price for s in reversed(swings) if s.kind == "low"),
-                   last - INVALIDATION_FALLBACK_ATR_MULT * atr_value)
-        invalidation = float(opp)
-        # next resistance ABOVE last close
-        ups = [L.price for L in levels if L.price > last and L.type == "resistance"]
-        target = float(min(ups)) if ups else None
-    else:
-        opp = next((s.price for s in reversed(swings) if s.kind == "high"),
-                   last + INVALIDATION_FALLBACK_ATR_MULT * atr_value)
-        invalidation = float(opp)
-        downs = [L.price for L in levels if L.price < last and L.type == "support"]
-        target = float(max(downs)) if downs else None
+    invalidation, target = _atr_stop_and_target(last, atr_value, side, levels)
     return References(
         entry_zone=band,
         invalidation_level=invalidation,
@@ -77,22 +103,13 @@ def for_retest(bars: Sequence[Bar], *,
                level_price: float,
                levels: List[Level],
                side: str) -> References:
-    """Retest entry band: ± 0.3 × ATR around the broken level."""
+    """V12: retest entry = level ± 0.3×ATR band. Same V12 stop/target
+    formula anchored at the level price."""
     half = ENTRY_BAND_RETEST_ATR * atr_value
     band = _make_band(level_price, half)
-    swings = find_swings_adaptive(bars)
-    if side == "long":
-        opp = next((s.price for s in reversed(swings) if s.kind == "low"),
-                   level_price - INVALIDATION_FALLBACK_ATR_MULT * atr_value)
-        invalidation = float(opp)
-        ups = [L.price for L in levels if L.price > level_price and L.type == "resistance"]
-        target = float(min(ups)) if ups else None
-    else:
-        opp = next((s.price for s in reversed(swings) if s.kind == "high"),
-                   level_price + INVALIDATION_FALLBACK_ATR_MULT * atr_value)
-        invalidation = float(opp)
-        downs = [L.price for L in levels if L.price < level_price and L.type == "support"]
-        target = float(max(downs)) if downs else None
+    invalidation, target = _atr_stop_and_target(
+        float(level_price), atr_value, side, levels,
+    )
     return References(
         entry_zone=band,
         invalidation_level=invalidation,
@@ -105,26 +122,19 @@ def for_pullback(bars: Sequence[Bar], *,
                  atr_value: float,
                  levels: List[Level],
                  side: str) -> References:
-    """Pullback entry band: ± 0.3 × ATR around recent same-side swing."""
+    """V12: pullback entry = recent same-side swing ± 0.3×ATR. V12 stop/target."""
     swings = find_swings_adaptive(bars)
     last = bars[-1].close
     half = ENTRY_BAND_PULLBACK_ATR * atr_value
     if side == "long":
         anchor_swing = next((s for s in reversed(swings) if s.kind == "low"), None)
         anchor = anchor_swing.price if anchor_swing else last
-        opp_low = next((s.price for s in reversed(swings) if s.kind == "low"),
-                       last - INVALIDATION_FALLBACK_ATR_MULT * atr_value)
-        invalidation = float(opp_low)
-        ups = [L.price for L in levels if L.price > last and L.type == "resistance"]
-        target = float(min(ups)) if ups else None
     else:
         anchor_swing = next((s for s in reversed(swings) if s.kind == "high"), None)
         anchor = anchor_swing.price if anchor_swing else last
-        opp_high = next((s.price for s in reversed(swings) if s.kind == "high"),
-                        last + INVALIDATION_FALLBACK_ATR_MULT * atr_value)
-        invalidation = float(opp_high)
-        downs = [L.price for L in levels if L.price < last and L.type == "support"]
-        target = float(max(downs)) if downs else None
+    invalidation, target = _atr_stop_and_target(
+        float(anchor), atr_value, side, levels,
+    )
     return References(
         entry_zone=_make_band(anchor, half),
         invalidation_level=invalidation,

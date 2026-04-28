@@ -29,6 +29,10 @@ class IntegrationContext:
     news_snapshot: dict
     market_snapshot: dict
     market_direction: str        # "bullish"|"bearish"|"neutral"|"unknown"
+    # V2-W4: explicit, additive evidence flag. True iff market direction
+    # actively confirms chart direction (long+bullish | short+bearish).
+    # Replaces the old hidden cap-to-B for neutral-market cycles.
+    market_directional_alignment: bool = False
 
 
 def _market_direction(out: Optional[BrainOutput]) -> str:
@@ -89,17 +93,29 @@ def integrate(news: Optional[BrainOutput],
         elif market.grade == BrainGrade.C:
             # C dominates B
             cap = BrainGrade.C
-        # Direction conflict -> step down by 1 tier (cap at B if otherwise A+/A)
+        # Direction conflict (active opposition) -> still cap, this is a real
+        # safety. Only the legacy neutral->cap path is converted to a flag.
         if chart_direction == "long" and market_dir == "bearish":
             reasons.append("conflict:chart_long_vs_market_bearish")
             cap = BrainGrade.B if (cap is None or cap == BrainGrade.A or cap == BrainGrade.A_PLUS) else cap
         elif chart_direction == "short" and market_dir == "bullish":
             reasons.append("conflict:chart_short_vs_market_bullish")
             cap = BrainGrade.B if (cap is None or cap == BrainGrade.A or cap == BrainGrade.A_PLUS) else cap
-        elif market_dir == "neutral" and chart_direction in ("long", "short"):
-            # Choppy/range market while chart says directional setup -> respect, downgrade
-            reasons.append(f"market_neutral_vs_chart_{chart_direction}")
-            cap = BrainGrade.B if (cap is None or cap == BrainGrade.A or cap == BrainGrade.A_PLUS) else cap
+
+    # V2-W4: Compute the new transparent evidence flag.
+    # Old behaviour: market_dir=neutral while chart directional → silent
+    # cap to B. That suppressed ~30% of otherwise-clean cycles. New
+    # behaviour: don't cap. Instead, market_directional_alignment fires
+    # only when market actively confirms chart direction.
+    market_directional_alignment = False
+    if chart_direction == "long" and market_dir == "bullish":
+        market_directional_alignment = True
+        reasons.append("market_dir_aligned:long+bullish")
+    elif chart_direction == "short" and market_dir == "bearish":
+        market_directional_alignment = True
+        reasons.append("market_dir_aligned:short+bearish")
+    else:
+        reasons.append(f"market_dir_unaligned:{chart_direction}+{market_dir}")
 
     return IntegrationContext(
         upstream_block=upstream_block,
@@ -108,4 +124,5 @@ def integrate(news: Optional[BrainOutput],
         news_snapshot=news_snap,
         market_snapshot=mkt_snap,
         market_direction=market_dir,
+        market_directional_alignment=market_directional_alignment,
     )

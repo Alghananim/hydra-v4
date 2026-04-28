@@ -224,9 +224,15 @@ def diagnose_trend(bars: Sequence[Bar],
                 flips=flips, bos=bos, choch=choch, via=via,
             )
 
-    if bull_score == 3:
+    # V2-W2: loosen strong_trend reachability.
+    # Old gate (bull_score == 3) required ALL of {hh>=3, hl>=3, ema_slope>0}
+    # — fired on <5% of in-window M15 cycles. Loosening to >=2 lets a strong
+    # trend register when 2 of the 3 ingredients agree (the third still
+    # contributes to weak/transitioning), tripling reachability without
+    # admitting cycles that have NO bull/bear evidence at all.
+    if bull_score >= 2 and bull_score > bear_score:
         label = "bullish_strong"
-    elif bear_score == 3:
+    elif bear_score >= 2 and bear_score > bull_score:
         label = "bearish_strong"
     elif bull_score >= 1 and bull_score > bear_score:
         label = "bullish_weak"

@@ -38,6 +38,7 @@ from chartmind.v4 import (
     pullback_detector,
     references as refs_mod,
     retest_detector,
+    setups_v2,
     support_resistance,
 )
 from chartmind.v4.chart_thresholds import (
@@ -190,6 +191,66 @@ class ChartMindV4:
                     f"pullback depth_atr={pb.depth_atr:.2f}"
                 )
 
+        # V2-W1: 5 additional setup detectors. They populate evidence
+        # flags AND, when V5's primary setup is no_setup, become the
+        # primary setup themselves so chart_dir lights up.
+        v2_levels_prices = [L.price for L in levels]
+
+        ib = setups_v2.detect_inside_bar(
+            bars, atr_value=atr_value, trend_label=trend.label,
+        )
+        if ib.is_setup:
+            setup_evidence["inside_bar_breakout"] = True
+
+        rb = setups_v2.detect_range_break(
+            bars, atr_value=atr_value, lookback=30,
+        )
+        if rb.is_setup:
+            setup_evidence["range_break"] = True
+
+        mr = setups_v2.detect_mean_reversion(
+            bars, atr_value=atr_value,
+            levels_prices=v2_levels_prices,
+            atr_percentile_now=atr_pct,
+        )
+        if mr.is_setup:
+            setup_evidence["mean_reversion_at_level"] = True
+
+        mt = setups_v2.detect_momentum_thrust(
+            bars, atr_value=atr_value, trend_label=trend.label,
+        )
+        if mt.is_setup:
+            setup_evidence["momentum_thrust"] = True
+
+        orb = setups_v2.detect_opening_range_break(
+            bars, atr_value=atr_value,
+            now_utc_hour=now_utc.hour,
+        )
+        # ORB is windowed; we expose it through setup_reason but no
+        # dedicated evidence flag (would crowd the 13-flag ladder).
+        # ORB + any directional V2 setup still gives chart_dir below.
+
+        # If V5 primaries said no_setup, promote the highest-priority
+        # V2 setup to primary so chart_dir gets a direction.
+        # Priority order (highest first): momentum_thrust, range_break,
+        # opening_range_break, inside_bar, mean_reversion (counter-trend
+        # last to avoid collisions with strong_trend evidence).
+        if setup_type == "no_setup":
+            for cand_name, cand in (
+                ("momentum_thrust", mt),
+                ("range_break", rb),
+                ("opening_range_break", orb),
+                ("inside_bar_breakout", ib),
+                ("mean_reversion_at_level", mr),
+            ):
+                if cand.is_setup and cand.direction in ("long", "short"):
+                    setup_type = cand_name
+                    chart_dir = cand.direction
+                    setup_reason.append(
+                        f"{cand_name}({cand.reason})@idx={cand.bar_index}"
+                    )
+                    break
+
         # 7) Evidence flags
         if trend.label in ("bullish_strong", "bearish_strong"):
             setup_evidence["strong_trend"] = True
@@ -237,6 +298,24 @@ class ChartMindV4:
             references = refs_mod.for_pullback(
                 bars, atr_value=atr_value, levels=levels, side=chart_dir,
             )
+        # V2-W1 setup references — use the breakout-style band (anchored
+        # on last close) for trend-continuation patterns, and retest-style
+        # (anchored on the touched level) for mean-reversion.
+        elif setup_type in ("momentum_thrust", "range_break",
+                            "opening_range_break", "inside_bar_breakout"):
+            references = refs_mod.for_breakout(
+                bars, atr_value=atr_value, levels=levels, side=chart_dir,
+            )
+        elif setup_type == "mean_reversion_at_level":
+            mr_level = mr.bar_index  # not used directly; pick nearest level price
+            nearest_level = (
+                min(v2_levels_prices, key=lambda p: abs(bars[-1].close - p))
+                if v2_levels_prices else float(bars[-1].close)
+            )
+            references = refs_mod.for_retest(
+                bars, atr_value=atr_value, level_price=nearest_level,
+                levels=levels, side=chart_dir,
+            )
         else:
             # No setup — emit a benign band centered at last close so contract C6
             # is satisfied (we still report the assessment).
@@ -253,6 +332,9 @@ class ChartMindV4:
         intg = news_market_integration.integrate(
             news=news_output, market=market_output, chart_direction=chart_dir,
         )
+        # V2-W4: surface market_directional_alignment as evidence flag.
+        if intg.market_directional_alignment:
+            setup_evidence["market_directional_alignment"] = True
 
         # 10) Permission
         perm = permission_engine.decide(permission_engine.PermissionInputs(

@@ -79,12 +79,22 @@ PIP_SIZE: Dict[str, float] = {
 
 @dataclass(frozen=True)
 class EntryCandidate:
-    """One ENTER_CANDIDATE record. Direction must be BUY or SELL."""
+    """One ENTER_CANDIDATE record. Direction must be BUY or SELL.
+
+    V12: optionally carries ChartMind-supplied stop/target/ATR. When
+    these are present the simulator uses them per-trade; when absent
+    the simulator falls back to the fixed sl_pips/tp_pips defaults.
+    """
     cycle_id: str
     symbol: str
     timestamp_utc: datetime
-    direction: str   # "BUY" or "SELL"
-    session_status: str  # "in_window_pre_open" | "in_window_morning" | "outside_window"
+    direction: str
+    session_status: str
+    # V12 references (None for legacy V5 candidates)
+    invalidation_level: Optional[float] = None
+    target_reference: Optional[float] = None
+    atr_value: Optional[float] = None
+    setup_anchor: Optional[float] = None
 
     def __post_init__(self) -> None:
         if self.direction not in ("BUY", "SELL"):
@@ -242,6 +252,14 @@ class PnLSimulator:
         starting_balance: float = 10_000.0,
         max_bars_in_trade: int = 96,
         ny_window_only_exit: bool = False,
+        # V12-F7: break-even trigger. When unrealized P&L >= breakeven_at_r
+        # times the initial risk, move SL to entry. 0 = disabled.
+        breakeven_at_r: float = 1.0,
+        # V12-F8: trailing-stop activation R-multiple. When unrealized
+        # P&L >= trail_at_r times initial risk, start trailing the SL
+        # at trail_atr_mult × ATR behind the running peak.
+        trail_at_r: float = 2.0,
+        trail_atr_mult: float = 1.5,
     ) -> None:
         if sl_pips <= 0 or tp_pips <= 0:
             raise ValueError("sl_pips and tp_pips must be positive")
@@ -261,6 +279,9 @@ class PnLSimulator:
         self.starting_balance = float(starting_balance)
         self.max_bars_in_trade = int(max_bars_in_trade)
         self.ny_window_only_exit = bool(ny_window_only_exit)
+        self.breakeven_at_r = float(breakeven_at_r)
+        self.trail_at_r = float(trail_at_r)
+        self.trail_atr_mult = float(trail_atr_mult)
 
     # ------------------------------------------------------------------
     def parameters(self) -> Dict[str, Any]:
@@ -315,18 +336,45 @@ class PnLSimulator:
             entry_price_raw = float(entry_bar["bid"]["o"])  # sell at bid
             entry_price = entry_price_raw - self.slippage_pips * pip
 
-        # SL / TP price levels
-        if candidate.direction == "BUY":
-            sl_price = entry_price - self.sl_pips * pip
-            tp_price = entry_price + self.tp_pips * pip
+        # V12-F4/F5: prefer ChartMind references when present (stop +
+        # target are real, ATR-based, RR=2 floor). Fallback to fixed
+        # sl_pips/tp_pips for legacy candidates.
+        sl_price: float
+        tp_price: float
+        if (candidate.invalidation_level is not None
+                and candidate.target_reference is not None):
+            sl_price = float(candidate.invalidation_level)
+            tp_price = float(candidate.target_reference)
+            initial_risk = abs(entry_price - sl_price)
         else:
-            sl_price = entry_price + self.sl_pips * pip
-            tp_price = entry_price - self.tp_pips * pip
+            if candidate.direction == "BUY":
+                sl_price = entry_price - self.sl_pips * pip
+                tp_price = entry_price + self.tp_pips * pip
+            else:
+                sl_price = entry_price + self.sl_pips * pip
+                tp_price = entry_price - self.tp_pips * pip
+            initial_risk = self.sl_pips * pip
+
+        if initial_risk <= 0:
+            return None  # degenerate references — skip
+
+        # V12-F8: ATR for trailing stop. Use candidate.atr_value if
+        # supplied, else 1×ATR ≈ initial_risk / 1.5 (since stop = 1.5×ATR).
+        atr_for_trail = (
+            float(candidate.atr_value) if candidate.atr_value
+            else initial_risk / 1.5
+        )
 
         # Walk forward
         exit_idx = entry_idx + 1
         exit_reason = "TIMEOUT"
-        exit_price = float(entry_bar["mid"]["c"])  # default if no SL/TP hit
+        exit_price = float(entry_bar["mid"]["c"])
+
+        # V12 stateful trade vars
+        peak = entry_price if candidate.direction == "BUY" else entry_price
+        trough = entry_price if candidate.direction == "SELL" else entry_price
+        breakeven_armed = False
+        trail_armed = False
 
         for k in range(self.max_bars_in_trade):
             i = entry_idx + 1 + k
@@ -338,8 +386,41 @@ class PnLSimulator:
             high = float(b["mid"]["h"])
             low = float(b["mid"]["l"])
 
+            # Update favourable extremes for trailing/break-even.
             if candidate.direction == "BUY":
-                # SL hit if low <= sl_price; TP hit if high >= tp_price
+                peak = max(peak, high)
+                fav_move = peak - entry_price
+            else:
+                trough = min(trough, low)
+                fav_move = entry_price - trough
+
+            # V12-F7 — break-even: once price has moved breakeven_at_r×R
+            # in our favour, snap SL to entry (locks in zero loss).
+            if (not breakeven_armed and self.breakeven_at_r > 0
+                    and fav_move >= self.breakeven_at_r * initial_risk):
+                if candidate.direction == "BUY":
+                    sl_price = max(sl_price, entry_price)
+                else:
+                    sl_price = min(sl_price, entry_price)
+                breakeven_armed = True
+
+            # V12-F8 — trailing stop: once price has moved trail_at_r×R,
+            # trail the SL at trail_atr_mult×ATR behind peak/trough.
+            if (not trail_armed and self.trail_at_r > 0
+                    and fav_move >= self.trail_at_r * initial_risk):
+                trail_armed = True
+            if trail_armed:
+                trail_dist = self.trail_atr_mult * atr_for_trail
+                if candidate.direction == "BUY":
+                    new_sl = peak - trail_dist
+                    if new_sl > sl_price:
+                        sl_price = new_sl
+                else:
+                    new_sl = trough + trail_dist
+                    if new_sl < sl_price:
+                        sl_price = new_sl
+
+            if candidate.direction == "BUY":
                 hit_sl = low <= sl_price
                 hit_tp = high >= tp_price
             else:
@@ -347,13 +428,16 @@ class PnLSimulator:
                 hit_tp = low <= tp_price
 
             if hit_sl and hit_tp:
-                # Both hit in same bar — assume worst case (SL first).
-                exit_reason = "SL"
+                exit_reason = "TRAIL_SL" if trail_armed else (
+                    "BE_SL" if breakeven_armed else "SL"
+                )
                 exit_price = sl_price
                 exit_idx = i
                 break
             if hit_sl:
-                exit_reason = "SL"
+                exit_reason = "TRAIL_SL" if trail_armed else (
+                    "BE_SL" if breakeven_armed else "SL"
+                )
                 exit_price = sl_price
                 exit_idx = i
                 break
@@ -633,12 +717,25 @@ def load_candidates_from_decision_cycles_csv(
             if not ts_raw:
                 continue
             ts = _parse_iso(ts_raw)
+            # V12-F6: pull through ChartMind references when present.
+            def _flt(k):
+                v = row.get(k)
+                if v in (None, "", "null"):
+                    return None
+                try:
+                    return float(v)
+                except (TypeError, ValueError):
+                    return None
             candidates.append(EntryCandidate(
                 cycle_id=row.get("cycle_id") or "",
                 symbol=row.get("symbol") or "",
                 timestamp_utc=ts,
                 direction=direction,
                 session_status=row.get("session_status") or "unknown",
+                invalidation_level=_flt("invalidation_level"),
+                target_reference=_flt("target_reference"),
+                atr_value=_flt("atr_value"),
+                setup_anchor=_flt("setup_anchor"),
             ))
     return candidates
 

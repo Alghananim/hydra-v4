@@ -39,13 +39,33 @@ def collect_data_quality(news, market, chart) -> Dict[str, str]:
 
 
 def all_grades_pass(news, market, chart) -> Tuple[bool, str]:
-    grades = [news.grade, market.grade, chart.grade]
-    for g in grades:
-        if g.value not in ALLOWED_GRADES:
+    """V12-F2: split chart vs vetoer thresholds.
+
+    Old behaviour: every brain had to be A or A+; B at any brain blocked.
+    Audit showed 19,323 of 19,392 in-window cycles (99.64%) died here —
+    almost always because NewsMind or MarketMind landed on B while
+    ChartMind was correctly A. Throwing away a tradeable chart signal
+    because the vetoer's confidence ladder was at B (not actively
+    blocking, just less certain) is the V5 bottleneck.
+
+    V12 rule:
+      - ChartMind grade MUST be A or A+ (it's the directional voice).
+      - NewsMind / MarketMind grade may be B (vetoer mode); only their
+        BLOCK decision (caught upstream) actually kills the cycle.
+      - C / BLOCK at any brain still fails.
+    """
+    chart_g = chart.grade.value
+    if chart_g not in ALLOWED_GRADES:
+        return False, "below_threshold"  # canonical reason — preserved
+    vetoer_grades = (news.grade.value, market.grade.value)
+    for g in vetoer_grades:
+        if g not in ("A", "A+", "B"):
             return False, "below_threshold"
-    if all(g == BrainGrade.A_PLUS for g in grades):
+    if chart.grade == BrainGrade.A_PLUS and all(
+        g.value == "A+" for g in (news.grade, market.grade)
+    ):
         return True, "all_a_plus"
-    return True, "all_a_or_better"
+    return True, "chart_a_vetoers_b_or_better"
 
 
 def consensus_status(news, market, chart) -> Tuple[str, str | None]:

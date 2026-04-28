@@ -95,7 +95,9 @@ def r1_schema(ctx: RuleContext) -> RuleResult:
 # R2 — New York session window
 # ---------------------------------------------------------------------------
 def r2_session(ctx: RuleContext) -> RuleResult:
-    in_window, label = session_check.is_in_ny_window(ctx.now_utc)
+    # V12-F3: route through per-pair UTC session windows. Falls back to
+    # NY-legacy when ctx.symbol is empty/unknown.
+    in_window, label = session_check.is_in_session(ctx.now_utc, ctx.symbol)
     ctx.session_label = label
     ctx.audit_trail.append(f"R2_session:{label}")
     if not in_window:

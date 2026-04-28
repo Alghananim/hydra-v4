@@ -12,19 +12,34 @@ from __future__ import annotations
 from typing import FrozenSet, Tuple
 
 # ----------------------------------------------------------------------------
-# New York trading windows (LOCAL NY time, IANA America/New_York, DST-aware)
+# Trading windows — V12-F3 per-pair UTC session policy
 # ----------------------------------------------------------------------------
-# Two windows: pre-Frankfurt/London overlap and full NY morning.
-#   Window 1: 03:00 - 05:00 NY  (pre-open / Frankfurt → London handoff)
-#   Window 2: 08:00 - 12:00 NY  (NY morning, into lunch)
+# V5 used NY-only windows in NY local time. The audit showed this excluded
+# 75% of cycles (only ~25,000 of 99,298 in-window). V12 widens per-pair to
+# match each pair's natural liquidity peaks, in UTC for clarity:
+#   EUR/USD: London (07:00 UTC) → NY close (21:00 UTC).
+#   USD/JPY: Tokyo (00:00-07:00 UTC) + London-overlap+NY (12:00-21:00 UTC).
+# Weekend cut: Fri 21:00 UTC → Sun 22:00 UTC (forex weekend).
 NY_TIMEZONE: str = "America/New_York"
+# LEGACY — kept for tests/code that still reference NY local windows.
 NY_WINDOWS: Tuple[Tuple[int, int], ...] = ((3, 5), (8, 12))
-
 WINDOW_LABELS = {
     (3, 5): "in_window_pre_open",
     (8, 12): "in_window_morning",
 }
 OUTSIDE_WINDOW_LABEL: str = "outside_window"
+
+# V12-F3 per-pair UTC session windows. Each tuple = (label, start, end)
+# where the gate accepts when start <= utc_hour < end.
+SESSION_WINDOWS_UTC = {
+    "EUR_USD": (("london", 7, 13), ("ny", 13, 21)),
+    "EURUSD":  (("london", 7, 13), ("ny", 13, 21)),
+    "USD_JPY": (("tokyo", 0, 7), ("london_ny", 12, 21)),
+    "USDJPY":  (("tokyo", 0, 7), ("london_ny", 12, 21)),
+}
+# Default fallback for any pair not in the table (legacy NY-style).
+DEFAULT_SESSION_WINDOWS_UTC = (("ny_legacy", 12, 21),)
+WEEKEND_CUT_UTC = ("FRI_21", "SUN_22")  # Block Fri 21:00 UTC → Sun 22:00 UTC
 
 # ----------------------------------------------------------------------------
 # Grade threshold — only A and A+ pass
