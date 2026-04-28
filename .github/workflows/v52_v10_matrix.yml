@@ -101,7 +101,7 @@ jobs:
             replay_runs/${{ matrix.variant }}/
             replay_runs/${{ matrix.variant }}_warroom/
 
-      - name: Commit variant outputs
+      - name: Commit variant outputs (with retry on race)
         if: always() && steps.gate.outputs.skip == 'false'
         run: |
           git config user.name "hydra-variant-bot"
@@ -114,8 +114,20 @@ jobs:
                   "replay_runs/${{ matrix.variant }}_warroom/"*.json 2>/dev/null || true
           if git diff --cached --quiet ; then
             echo "No changes to commit."
-          else
-            git pull --rebase || true
-            git commit -m "hydra ${{ matrix.variant }}: backtest + war room results"
-            git push
+            exit 0
           fi
+          git commit -m "hydra ${{ matrix.variant }}: backtest + war room results"
+          # Retry push up to 8 times with rebase on conflict (10 parallel jobs
+          # means race conditions are guaranteed; we accept all of them).
+          for i in 1 2 3 4 5 6 7 8; do
+            git fetch origin main
+            git pull --rebase origin main || git rebase --abort || true
+            if git push origin main ; then
+              echo "Push succeeded on attempt $i"
+              exit 0
+            fi
+            echo "Push attempt $i failed, retrying after sleep..."
+            sleep $((RANDOM % 30 + 5))
+          done
+          echo "All 8 push attempts failed."
+          exit 1
