@@ -1,0 +1,48 @@
+{
+  "params": {
+    "SL_PIPS": 20.0,
+    "TP_PIPS": 40.0,
+    "COST_PIPS": 1.5,
+    "MAX_HOLD_BARS": 24
+  },
+  "summary_by_mode": {
+    "shadow_chart": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "timeouts": 0,
+      "win_rate_excl_timeout": null,
+      "net_pips_after_cost": 0,
+      "avg_pips_per_trade": null,
+      "max_drawdown_pips": 0.0,
+      "per_pair": {}
+    },
+    "shadow_grade_B": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "timeouts": 0,
+      "win_rate_excl_timeout": null,
+      "net_pips_after_cost": 0,
+      "avg_pips_per_trade": null,
+      "max_drawdown_pips": 0.0,
+      "per_pair": {}
+    },
+    "shadow_2_of_3": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "timeouts": 0,
+      "win_rate_excl_timeout": null,
+      "net_pips_after_cost": 0,
+      "avg_pips_per_trade": null,
+      "max_drawdown_pips": 0.0,
+      "per_pair": {}
+    }
+  },
+  "trade_counts_total": {
+    "shadow_chart": 0,
+    "shadow_grade_B": 0,
+    "shadow_2_of_3": 0
+  }
+}

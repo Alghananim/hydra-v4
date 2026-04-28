@@ -1,0 +1,31 @@
+{
+  "input_file": "replay_runs/v11_baseline/cycles.jsonl",
+  "total_records": 0,
+  "final_status_counts": {},
+  "final_reason_counts": [],
+  "session_status_counts": {},
+  "pair_counts": {},
+  "in_window_breakdown": {
+    "total": 0,
+    "BLOCK": 0,
+    "WAIT": 0,
+    "ENTER_CANDIDATE": 0
+  },
+  "grade_distribution_by_mind": {
+    "NewsMind": {},
+    "MarketMind": {},
+    "ChartMind": {}
+  },
+  "decision_distribution_by_mind": {
+    "NewsMind": {},
+    "MarketMind": {},
+    "ChartMind": {}
+  },
+  "data_quality_distribution_by_mind": {
+    "NewsMind": {},
+    "MarketMind": {},
+    "ChartMind": {}
+  },
+  "top_decision_triples": [],
+  "top_triple_reason_combos": []
+}
