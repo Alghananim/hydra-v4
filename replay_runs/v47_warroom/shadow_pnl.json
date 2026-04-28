@@ -1,0 +1,93 @@
+{
+  "params": {
+    "SL_PIPS": 20.0,
+    "TP_PIPS": 40.0,
+    "COST_PIPS": 1.5,
+    "MAX_HOLD_BARS": 24
+  },
+  "summary_by_mode": {
+    "shadow_chart": {
+      "trades": 13,
+      "wins": 1,
+      "losses": 5,
+      "timeouts": 7,
+      "win_rate_excl_timeout": 16.666666666666664,
+      "net_pips_after_cost": -58.7,
+      "avg_pips_per_trade": -4.52,
+      "max_drawdown_pips": -97.2,
+      "per_pair": {
+        "EUR_USD": {
+          "trades": 5,
+          "net_pips": 16.8,
+          "wins": 1,
+          "losses": 1,
+          "timeouts": 3
+        },
+        "USD_JPY": {
+          "trades": 8,
+          "net_pips": -75.5,
+          "wins": 0,
+          "losses": 4,
+          "timeouts": 4
+        }
+      }
+    },
+    "shadow_grade_B": {
+      "trades": 13,
+      "wins": 1,
+      "losses": 5,
+      "timeouts": 7,
+      "win_rate_excl_timeout": 16.666666666666664,
+      "net_pips_after_cost": -58.7,
+      "avg_pips_per_trade": -4.52,
+      "max_drawdown_pips": -97.2,
+      "per_pair": {
+        "EUR_USD": {
+          "trades": 5,
+          "net_pips": 16.8,
+          "wins": 1,
+          "losses": 1,
+          "timeouts": 3
+        },
+        "USD_JPY": {
+          "trades": 8,
+          "net_pips": -75.5,
+          "wins": 0,
+          "losses": 4,
+          "timeouts": 4
+        }
+      }
+    },
+    "shadow_2_of_3": {
+      "trades": 13,
+      "wins": 1,
+      "losses": 5,
+      "timeouts": 7,
+      "win_rate_excl_timeout": 16.666666666666664,
+      "net_pips_after_cost": -58.7,
+      "avg_pips_per_trade": -4.52,
+      "max_drawdown_pips": -97.2,
+      "per_pair": {
+        "EUR_USD": {
+          "trades": 5,
+          "net_pips": 16.8,
+          "wins": 1,
+          "losses": 1,
+          "timeouts": 3
+        },
+        "USD_JPY": {
+          "trades": 8,
+          "net_pips": -75.5,
+          "wins": 0,
+          "losses": 4,
+          "timeouts": 4
+        }
+      }
+    }
+  },
+  "trade_counts_total": {
+    "shadow_chart": 13,
+    "shadow_grade_B": 13,
+    "shadow_2_of_3": 13
+  }
+}

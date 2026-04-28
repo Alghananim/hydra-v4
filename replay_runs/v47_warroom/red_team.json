@@ -1,0 +1,138 @@
+[
+  {
+    "name": "P1_no_lookahead_in_simulator",
+    "passed": true,
+    "evidence": [
+      "loop bound and entry-bar reference are clean"
+    ]
+  },
+  {
+    "name": "P2_costs_deducted",
+    "passed": true,
+    "evidence": [
+      "all three exit branches deduct COST_PIPS"
+    ]
+  },
+  {
+    "name": "P3_realistic_spread_floor",
+    "passed": false,
+    "evidence": {
+      "median_spread_pips_per_pair": {
+        "EUR_USD": 1.5,
+        "USD_JPY": 1.7
+      },
+      "assumed_round_trip_cost": 1.5,
+      "verdict_note": "FAIL: actual median spread exceeds assumed cost; raise COST_PIPS"
+    }
+  },
+  {
+    "name": "P4_segmented_robustness",
+    "passed": false,
+    "evidence": {
+      "shadow_chart": {
+        "segments_pips": [
+          -12.1,
+          -21.2,
+          -35.6,
+          10.2
+        ],
+        "all_positive": false
+      },
+      "shadow_grade_B": {
+        "segments_pips": [
+          -12.1,
+          -21.2,
+          -35.6,
+          10.2
+        ],
+        "all_positive": false
+      },
+      "shadow_2_of_3": {
+        "segments_pips": [
+          -12.1,
+          -21.2,
+          -35.6,
+          10.2
+        ],
+        "all_positive": false
+      }
+    }
+  },
+  {
+    "name": "P5_per_pair_robustness",
+    "passed": false,
+    "evidence": {
+      "shadow_chart": {
+        "EUR_USD": 16.8,
+        "USD_JPY": -75.5
+      },
+      "shadow_grade_B": {
+        "EUR_USD": 16.8,
+        "USD_JPY": -75.5
+      },
+      "shadow_2_of_3": {
+        "EUR_USD": 16.8,
+        "USD_JPY": -75.5
+      }
+    }
+  },
+  {
+    "name": "P6_per_window_robustness",
+    "passed": false,
+    "evidence": {
+      "shadow_chart": {
+        "in_window_morning": -97.2,
+        "in_window_pre_open": 38.5
+      },
+      "shadow_grade_B": {
+        "in_window_morning": -97.2,
+        "in_window_pre_open": 38.5
+      },
+      "shadow_2_of_3": {
+        "in_window_morning": -97.2,
+        "in_window_pre_open": 38.5
+      }
+    }
+  },
+  {
+    "name": "P7_drawdown_floor",
+    "passed": false,
+    "evidence": {
+      "shadow_chart": {
+        "net_pips": -58.7,
+        "max_drawdown": 97.2,
+        "drawdown_to_net_ratio": Infinity,
+        "passed": false
+      },
+      "shadow_grade_B": {
+        "net_pips": -58.7,
+        "max_drawdown": 97.2,
+        "drawdown_to_net_ratio": Infinity,
+        "passed": false
+      },
+      "shadow_2_of_3": {
+        "net_pips": -58.7,
+        "max_drawdown": 97.2,
+        "drawdown_to_net_ratio": Infinity,
+        "passed": false
+      }
+    }
+  },
+  {
+    "name": "P8_loose_modes_dont_explode_drawdown",
+    "passed": true,
+    "evidence": {
+      "baseline": 97.2,
+      "shadow_chart": {
+        "dd": 97.2,
+        "ratio_vs_baseline": 1.0,
+        "passed": true
+      },
+      "shadow_grade_B": {
+        "dd": 97.2,
+        "ratio_vs_baseline": 1.0,
+        "passed": true
+      }
+    }
+  }
+]
