@@ -1,0 +1,25 @@
+HYDRA V4 - PHASE 2 VERIFY 
+Started: Mon 04/27/2026 21:54:52.63 
+Working dir: C:\Users\Mansur\Desktop\HYDRA V4 
+ 
+=== [1] FIVE BRAINS + ORCHESTRATOR IMPORT CHECK === 
+  newsmind: OK
+  marketmind: OK
+  chartmind: OK
+  gatemind: OK
+  smartnotebook: OK
+  orchestrator: OK
+  replay_calendar: OK
+  replay_newsmind: OK
+  two_year_replay: OK
+  leakage_guard: OK
+  anthropic_bridge: OK
+  oanda_readonly_client: OK
+  live_order_guard: OK
+ 
+=== [2] PYTEST FULL TREE === 
+C:\Users\Mansur\AppData\Local\Python\pythoncore-3.14-64\python.exe: No module named pytest
+ 
+=== [3] PYTEST SUMMARY === 
+ 
+Finished: Mon 04/27/2026 21:54:56.68 

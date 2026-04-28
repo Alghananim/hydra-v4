@@ -1,0 +1,1524 @@
+From 33a29bd7b05d6dbe96552a7341241005c80a0209 Mon Sep 17 00:00:00 2001
+From: "Claude (HYDRA cleanup)" <claude@hydra.local>
+Date: Mon, 27 Apr 2026 04:05:04 +0000
+Subject: [PATCH 1/2] cleanup: rebrand to HYDRA V3, archive v1/v2 modules
+
+- Move ChartMind/, ChartMindV2/, MarketMind/, NewsMind/ (root), GateMind/,
+  SmartNoteBook/, LLMCore/, OandaAdapter/ to archive/
+- Move Engine.py, main.py, position_monitor.py to archive/
+- Move NewsMind/config/*.yaml to config/news/
+- Add archive/README.md documenting what each archived item was for
+- Update Dockerfile CMD to use engine/v3/main_v3.py (not legacy main.py)
+- Add main_v3.py shim at project root for portable launching
+
+V3 brain modules (chartmind/v3, marketmind/v3, newsmind/v2, gatemind/v3,
+smartnotebook/v3, engine/v3, llm/) all import cleanly after the move.
+
+This eliminates the case-sensitivity collision (ChartMind vs chartmind etc.)
+that was causing checkout warnings on Windows.
+---
+ Dockerfile                                    |  2 +-
+ {ChartMind => archive/ChartMind}/ChartMind.py |  0
+ {ChartMind => archive/ChartMind}/__init__.py  |  0
+ .../ChartMind}/algo_awareness.py              |  0
+ .../ChartMind}/calibrated_confidence.py       |  0
+ .../ChartMind}/calibration.py                 |  0
+ .../ChartMind}/chart_patterns.py              |  0
+ .../ChartMind}/chartmind_llm.py               |  0
+ {ChartMind => archive/ChartMind}/clarity.py   |  0
+ {ChartMind => archive/ChartMind}/execution.py |  0
+ {ChartMind => archive/ChartMind}/narrative.py |  0
+ {ChartMind => archive/ChartMind}/planner.py   |  0
+ .../ChartMind}/price_action.py                |  0
+ {ChartMind => archive/ChartMind}/priors.py    |  0
+ {ChartMind => archive/ChartMind}/traps.py     |  0
+ {ChartMind => archive/ChartMind}/verify.py    |  0
+ {ChartMind => archive/ChartMind}/wyckoff.py   |  0
+ .../ChartMindV2}/ChartMindV2.py               |  0
+ .../ChartMindV2}/__init__.py                  |  0
+ .../ChartMindV2}/candles.py                   |  0
+ .../ChartMindV2}/confluence.py                |  0
+ {ChartMindV2 => archive/ChartMindV2}/grade.py |  0
+ .../ChartMindV2}/models.py                    |  0
+ .../ChartMindV2}/momentum.py                  |  0
+ .../ChartMindV2}/planner.py                   |  0
+ .../ChartMindV2}/structure.py                 |  0
+ {ChartMindV2 => archive/ChartMindV2}/trend.py |  0
+ Engine.py => archive/Engine.py                |  0
+ {GateMind => archive/GateMind}/GateMind.py    |  0
+ {GateMind => archive/GateMind}/__init__.py    |  0
+ {GateMind => archive/GateMind}/decision.py    |  0
+ .../GateMind}/execution_router.py             |  0
+ .../GateMind}/gatemind_llm.py                 |  0
+ .../GateMind}/kill_switches.py                |  0
+ {GateMind => archive/GateMind}/ledger.py      |  0
+ {GateMind => archive/GateMind}/narrative.py   |  0
+ {GateMind => archive/GateMind}/portfolio.py   |  0
+ {GateMind => archive/GateMind}/risk.py        |  0
+ {LLMCore => archive/LLMCore}/__init__.py      |  0
+ {LLMCore => archive/LLMCore}/client.py        |  0
+ {LLMCore => archive/LLMCore}/cost.py          |  0
+ {LLMCore => archive/LLMCore}/parallel.py      |  0
+ {LLMCore => archive/LLMCore}/prompts.py       |  0
+ .../MarketMind}/MarketMind.py                 |  0
+ .../MarketMind}/__init__.py                   |  0
+ .../MarketMind}/composites.py                 |  0
+ .../MarketMind}/integration.py                |  0
+ .../MarketMind}/market_data.py                |  0
+ .../MarketMind}/marketmind_llm.py             |  0
+ {NewsMind => archive/NewsMind}/NewsMind.py    |  0
+ {NewsMind => archive/NewsMind}/__init__.py    |  0
+ .../NewsMind}/channel_router.py               |  0
+ .../NewsMind}/config_loader.py                |  0
+ {NewsMind => archive/NewsMind}/conviction.py  |  0
+ .../NewsMind}/event_calendar.py               |  0
+ .../NewsMind}/event_classifier.py             |  0
+ .../NewsMind}/event_windows.py                |  0
+ .../NewsMind}/headline_scanner.py             |  0
+ {NewsMind => archive/NewsMind}/integration.py |  0
+ .../NewsMind}/liquidity_session.py            |  0
+ .../NewsMind}/narrative_tracker.py            |  0
+ {NewsMind => archive/NewsMind}/news_data.py   |  0
+ .../NewsMind}/news_narrative.py               |  0
+ {NewsMind => archive/NewsMind}/news_regime.py |  0
+ .../NewsMind}/newsmind_llm.py                 |  0
+ .../NewsMind}/precedent_engine.py             |  0
+ .../NewsMind}/surprise_engine.py              |  0
+ .../NewsMind}/v2/NewsMindV2.py                |  0
+ {NewsMind => archive/NewsMind}/v2/__init__.py |  0
+ .../NewsMind}/v2/chase_detector.py            |  0
+ .../NewsMind}/v2/event_scheduler.py           |  0
+ .../NewsMind}/v2/freshness.py                 |  0
+ {NewsMind => archive/NewsMind}/v2/models.py   |  0
+ .../NewsMind}/v2/permission.py                |  0
+ {NewsMind => archive/NewsMind}/v2/sources.py  |  0
+ .../OandaAdapter}/__init__.py                 |  0
+ .../OandaAdapter}/account.py                  |  0
+ .../OandaAdapter}/broker.py                   |  0
+ .../OandaAdapter}/client.py                   |  0
+ .../OandaAdapter}/feed.py                     |  0
+ .../OandaAdapter}/instruments.py              |  0
+ archive/README.md                             | 29 +++++++++++++++++++
+ .../SmartNoteBook}/SmartNoteBook.py           |  0
+ .../SmartNoteBook}/__init__.py                |  0
+ .../SmartNoteBook}/bias_detector.py           |  0
+ .../SmartNoteBook}/briefing.py                |  0
+ .../SmartNoteBook}/journal.py                 |  0
+ .../SmartNoteBook}/lessons.py                 |  0
+ .../SmartNoteBook}/llm_grader.py              |  0
+ .../SmartNoteBook}/memory_injector.py         |  0
+ .../SmartNoteBook}/metrics.py                 |  0
+ .../SmartNoteBook}/patterns.py                |  0
+ .../SmartNoteBook}/post_mortem.py             |  0
+ .../SmartNoteBook}/pre_mortem.py              |  0
+ main.py => archive/main.py                    |  0
+ .../position_monitor.py                       |  0
+ {NewsMind/config => config/news}/events.yaml  |  0
+ .../config => config/news}/keywords.yaml      |  0
+ .../config => config/news}/narratives.yaml    |  0
+ {NewsMind/config => config/news}/sources.yaml |  0
+ main_v3.py                                    | 21 ++++++++++++++
+ 101 files changed, 51 insertions(+), 1 deletion(-)
+ rename {ChartMind => archive/ChartMind}/ChartMind.py (100%)
+ rename {ChartMind => archive/ChartMind}/__init__.py (100%)
+ rename {ChartMind => archive/ChartMind}/algo_awareness.py (100%)
+ rename {ChartMind => archive/ChartMind}/calibrated_confidence.py (100%)
+ rename {ChartMind => archive/ChartMind}/calibration.py (100%)
+ rename {ChartMind => archive/ChartMind}/chart_patterns.py (100%)
+ rename {ChartMind => archive/ChartMind}/chartmind_llm.py (100%)
+ rename {ChartMind => archive/ChartMind}/clarity.py (100%)
+ rename {ChartMind => archive/ChartMind}/execution.py (100%)
+ rename {ChartMind => archive/ChartMind}/narrative.py (100%)
+ rename {ChartMind => archive/ChartMind}/planner.py (100%)
+ rename {ChartMind => archive/ChartMind}/price_action.py (100%)
+ rename {ChartMind => archive/ChartMind}/priors.py (100%)
+ rename {ChartMind => archive/ChartMind}/traps.py (100%)
+ rename {ChartMind => archive/ChartMind}/verify.py (100%)
+ rename {ChartMind => archive/ChartMind}/wyckoff.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/ChartMindV2.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/__init__.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/candles.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/confluence.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/grade.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/models.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/momentum.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/planner.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/structure.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/trend.py (100%)
+ rename Engine.py => archive/Engine.py (100%)
+ rename {GateMind => archive/GateMind}/GateMind.py (100%)
+ rename {GateMind => archive/GateMind}/__init__.py (100%)
+ rename {GateMind => archive/GateMind}/decision.py (100%)
+ rename {GateMind => archive/GateMind}/execution_router.py (100%)
+ rename {GateMind => archive/GateMind}/gatemind_llm.py (100%)
+ rename {GateMind => archive/GateMind}/kill_switches.py (100%)
+ rename {GateMind => archive/GateMind}/ledger.py (100%)
+ rename {GateMind => archive/GateMind}/narrative.py (100%)
+ rename {GateMind => archive/GateMind}/portfolio.py (100%)
+ rename {GateMind => archive/GateMind}/risk.py (100%)
+ rename {LLMCore => archive/LLMCore}/__init__.py (100%)
+ rename {LLMCore => archive/LLMCore}/client.py (100%)
+ rename {LLMCore => archive/LLMCore}/cost.py (100%)
+ rename {LLMCore => archive/LLMCore}/parallel.py (100%)
+ rename {LLMCore => archive/LLMCore}/prompts.py (100%)
+ rename {MarketMind => archive/MarketMind}/MarketMind.py (100%)
+ rename {MarketMind => archive/MarketMind}/__init__.py (100%)
+ rename {MarketMind => archive/MarketMind}/composites.py (100%)
+ rename {MarketMind => archive/MarketMind}/integration.py (100%)
+ rename {MarketMind => archive/MarketMind}/market_data.py (100%)
+ rename {MarketMind => archive/MarketMind}/marketmind_llm.py (100%)
+ rename {NewsMind => archive/NewsMind}/NewsMind.py (100%)
+ rename {NewsMind => archive/NewsMind}/__init__.py (100%)
+ rename {NewsMind => archive/NewsMind}/channel_router.py (100%)
+ rename {NewsMind => archive/NewsMind}/config_loader.py (100%)
+ rename {NewsMind => archive/NewsMind}/conviction.py (100%)
+ rename {NewsMind => archive/NewsMind}/event_calendar.py (100%)
+ rename {NewsMind => archive/NewsMind}/event_classifier.py (100%)
+ rename {NewsMind => archive/NewsMind}/event_windows.py (100%)
+ rename {NewsMind => archive/NewsMind}/headline_scanner.py (100%)
+ rename {NewsMind => archive/NewsMind}/integration.py (100%)
+ rename {NewsMind => archive/NewsMind}/liquidity_session.py (100%)
+ rename {NewsMind => archive/NewsMind}/narrative_tracker.py (100%)
+ rename {NewsMind => archive/NewsMind}/news_data.py (100%)
+ rename {NewsMind => archive/NewsMind}/news_narrative.py (100%)
+ rename {NewsMind => archive/NewsMind}/news_regime.py (100%)
+ rename {NewsMind => archive/NewsMind}/newsmind_llm.py (100%)
+ rename {NewsMind => archive/NewsMind}/precedent_engine.py (100%)
+ rename {NewsMind => archive/NewsMind}/surprise_engine.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/NewsMindV2.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/__init__.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/chase_detector.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/event_scheduler.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/freshness.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/models.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/permission.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/sources.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/__init__.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/account.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/broker.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/client.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/feed.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/instruments.py (100%)
+ create mode 100644 archive/README.md
+ rename {SmartNoteBook => archive/SmartNoteBook}/SmartNoteBook.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/__init__.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/bias_detector.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/briefing.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/journal.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/lessons.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/llm_grader.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/memory_injector.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/metrics.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/patterns.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/post_mortem.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/pre_mortem.py (100%)
+ rename main.py => archive/main.py (100%)
+ rename position_monitor.py => archive/position_monitor.py (100%)
+ rename {NewsMind/config => config/news}/events.yaml (100%)
+ rename {NewsMind/config => config/news}/keywords.yaml (100%)
+ rename {NewsMind/config => config/news}/narratives.yaml (100%)
+ rename {NewsMind/config => config/news}/sources.yaml (100%)
+ create mode 100644 main_v3.py
+
+diff --git a/Dockerfile b/Dockerfile
+index 4ca0c08..466f15c 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -23,4 +23,4 @@ ENV PYTHONUNBUFFERED=1
+ ENV POLL_INTERVAL_SEC=60
+ 
+ # Run the live loop.
+-CMD ["python", "/app/main.py"]
++CMD ["python", "/app/engine/v3/main_v3.py"]
+diff --git a/ChartMind/ChartMind.py b/archive/ChartMind/ChartMind.py
+similarity index 100%
+rename from ChartMind/ChartMind.py
+rename to archive/ChartMind/ChartMind.py
+diff --git a/ChartMind/__init__.py b/archive/ChartMind/__init__.py
+similarity index 100%
+rename from ChartMind/__init__.py
+rename to archive/ChartMind/__init__.py
+diff --git a/ChartMind/algo_awareness.py b/archive/ChartMind/algo_awareness.py
+similarity index 100%
+rename from ChartMind/algo_awareness.py
+rename to archive/ChartMind/algo_awareness.py
+diff --git a/ChartMind/calibrated_confidence.py b/archive/ChartMind/calibrated_confidence.py
+similarity index 100%
+rename from ChartMind/calibrated_confidence.py
+rename to archive/ChartMind/calibrated_confidence.py
+diff --git a/ChartMind/calibration.py b/archive/ChartMind/calibration.py
+similarity index 100%
+rename from ChartMind/calibration.py
+rename to archive/ChartMind/calibration.py
+diff --git a/ChartMind/chart_patterns.py b/archive/ChartMind/chart_patterns.py
+similarity index 100%
+rename from ChartMind/chart_patterns.py
+rename to archive/ChartMind/chart_patterns.py
+diff --git a/ChartMind/chartmind_llm.py b/archive/ChartMind/chartmind_llm.py
+similarity index 100%
+rename from ChartMind/chartmind_llm.py
+rename to archive/ChartMind/chartmind_llm.py
+diff --git a/ChartMind/clarity.py b/archive/ChartMind/clarity.py
+similarity index 100%
+rename from ChartMind/clarity.py
+rename to archive/ChartMind/clarity.py
+diff --git a/ChartMind/execution.py b/archive/ChartMind/execution.py
+similarity index 100%
+rename from ChartMind/execution.py
+rename to archive/ChartMind/execution.py
+diff --git a/ChartMind/narrative.py b/archive/ChartMind/narrative.py
+similarity index 100%
+rename from ChartMind/narrative.py
+rename to archive/ChartMind/narrative.py
+diff --git a/ChartMind/planner.py b/archive/ChartMind/planner.py
+similarity index 100%
+rename from ChartMind/planner.py
+rename to archive/ChartMind/planner.py
+diff --git a/ChartMind/price_action.py b/archive/ChartMind/price_action.py
+similarity index 100%
+rename from ChartMind/price_action.py
+rename to archive/ChartMind/price_action.py
+diff --git a/ChartMind/priors.py b/archive/ChartMind/priors.py
+similarity index 100%
+rename from ChartMind/priors.py
+rename to archive/ChartMind/priors.py
+diff --git a/ChartMind/traps.py b/archive/ChartMind/traps.py
+similarity index 100%
+rename from ChartMind/traps.py
+rename to archive/ChartMind/traps.py
+diff --git a/ChartMind/verify.py b/archive/ChartMind/verify.py
+similarity index 100%
+rename from ChartMind/verify.py
+rename to archive/ChartMind/verify.py
+diff --git a/ChartMind/wyckoff.py b/archive/ChartMind/wyckoff.py
+similarity index 100%
+rename from ChartMind/wyckoff.py
+rename to archive/ChartMind/wyckoff.py
+diff --git a/ChartMindV2/ChartMindV2.py b/archive/ChartMindV2/ChartMindV2.py
+similarity index 100%
+rename from ChartMindV2/ChartMindV2.py
+rename to archive/ChartMindV2/ChartMindV2.py
+diff --git a/ChartMindV2/__init__.py b/archive/ChartMindV2/__init__.py
+similarity index 100%
+rename from ChartMindV2/__init__.py
+rename to archive/ChartMindV2/__init__.py
+diff --git a/ChartMindV2/candles.py b/archive/ChartMindV2/candles.py
+similarity index 100%
+rename from ChartMindV2/candles.py
+rename to archive/ChartMindV2/candles.py
+diff --git a/ChartMindV2/confluence.py b/archive/ChartMindV2/confluence.py
+similarity index 100%
+rename from ChartMindV2/confluence.py
+rename to archive/ChartMindV2/confluence.py
+diff --git a/ChartMindV2/grade.py b/archive/ChartMindV2/grade.py
+similarity index 100%
+rename from ChartMindV2/grade.py
+rename to archive/ChartMindV2/grade.py
+diff --git a/ChartMindV2/models.py b/archive/ChartMindV2/models.py
+similarity index 100%
+rename from ChartMindV2/models.py
+rename to archive/ChartMindV2/models.py
+diff --git a/ChartMindV2/momentum.py b/archive/ChartMindV2/momentum.py
+similarity index 100%
+rename from ChartMindV2/momentum.py
+rename to archive/ChartMindV2/momentum.py
+diff --git a/ChartMindV2/planner.py b/archive/ChartMindV2/planner.py
+similarity index 100%
+rename from ChartMindV2/planner.py
+rename to archive/ChartMindV2/planner.py
+diff --git a/ChartMindV2/structure.py b/archive/ChartMindV2/structure.py
+similarity index 100%
+rename from ChartMindV2/structure.py
+rename to archive/ChartMindV2/structure.py
+diff --git a/ChartMindV2/trend.py b/archive/ChartMindV2/trend.py
+similarity index 100%
+rename from ChartMindV2/trend.py
+rename to archive/ChartMindV2/trend.py
+diff --git a/Engine.py b/archive/Engine.py
+similarity index 100%
+rename from Engine.py
+rename to archive/Engine.py
+diff --git a/GateMind/GateMind.py b/archive/GateMind/GateMind.py
+similarity index 100%
+rename from GateMind/GateMind.py
+rename to archive/GateMind/GateMind.py
+diff --git a/GateMind/__init__.py b/archive/GateMind/__init__.py
+similarity index 100%
+rename from GateMind/__init__.py
+rename to archive/GateMind/__init__.py
+diff --git a/GateMind/decision.py b/archive/GateMind/decision.py
+similarity index 100%
+rename from GateMind/decision.py
+rename to archive/GateMind/decision.py
+diff --git a/GateMind/execution_router.py b/archive/GateMind/execution_router.py
+similarity index 100%
+rename from GateMind/execution_router.py
+rename to archive/GateMind/execution_router.py
+diff --git a/GateMind/gatemind_llm.py b/archive/GateMind/gatemind_llm.py
+similarity index 100%
+rename from GateMind/gatemind_llm.py
+rename to archive/GateMind/gatemind_llm.py
+diff --git a/GateMind/kill_switches.py b/archive/GateMind/kill_switches.py
+similarity index 100%
+rename from GateMind/kill_switches.py
+rename to archive/GateMind/kill_switches.py
+diff --git a/GateMind/ledger.py b/archive/GateMind/ledger.py
+similarity index 100%
+rename from GateMind/ledger.py
+rename to archive/GateMind/ledger.py
+diff --git a/GateMind/narrative.py b/archive/GateMind/narrative.py
+similarity index 100%
+rename from GateMind/narrative.py
+rename to archive/GateMind/narrative.py
+diff --git a/GateMind/portfolio.py b/archive/GateMind/portfolio.py
+similarity index 100%
+rename from GateMind/portfolio.py
+rename to archive/GateMind/portfolio.py
+diff --git a/GateMind/risk.py b/archive/GateMind/risk.py
+similarity index 100%
+rename from GateMind/risk.py
+rename to archive/GateMind/risk.py
+diff --git a/LLMCore/__init__.py b/archive/LLMCore/__init__.py
+similarity index 100%
+rename from LLMCore/__init__.py
+rename to archive/LLMCore/__init__.py
+diff --git a/LLMCore/client.py b/archive/LLMCore/client.py
+similarity index 100%
+rename from LLMCore/client.py
+rename to archive/LLMCore/client.py
+diff --git a/LLMCore/cost.py b/archive/LLMCore/cost.py
+similarity index 100%
+rename from LLMCore/cost.py
+rename to archive/LLMCore/cost.py
+diff --git a/LLMCore/parallel.py b/archive/LLMCore/parallel.py
+similarity index 100%
+rename from LLMCore/parallel.py
+rename to archive/LLMCore/parallel.py
+diff --git a/LLMCore/prompts.py b/archive/LLMCore/prompts.py
+similarity index 100%
+rename from LLMCore/prompts.py
+rename to archive/LLMCore/prompts.py
+diff --git a/MarketMind/MarketMind.py b/archive/MarketMind/MarketMind.py
+similarity index 100%
+rename from MarketMind/MarketMind.py
+rename to archive/MarketMind/MarketMind.py
+diff --git a/MarketMind/__init__.py b/archive/MarketMind/__init__.py
+similarity index 100%
+rename from MarketMind/__init__.py
+rename to archive/MarketMind/__init__.py
+diff --git a/MarketMind/composites.py b/archive/MarketMind/composites.py
+similarity index 100%
+rename from MarketMind/composites.py
+rename to archive/MarketMind/composites.py
+diff --git a/MarketMind/integration.py b/archive/MarketMind/integration.py
+similarity index 100%
+rename from MarketMind/integration.py
+rename to archive/MarketMind/integration.py
+diff --git a/MarketMind/market_data.py b/archive/MarketMind/market_data.py
+similarity index 100%
+rename from MarketMind/market_data.py
+rename to archive/MarketMind/market_data.py
+diff --git a/MarketMind/marketmind_llm.py b/archive/MarketMind/marketmind_llm.py
+similarity index 100%
+rename from MarketMind/marketmind_llm.py
+rename to archive/MarketMind/marketmind_llm.py
+diff --git a/NewsMind/NewsMind.py b/archive/NewsMind/NewsMind.py
+similarity index 100%
+rename from NewsMind/NewsMind.py
+rename to archive/NewsMind/NewsMind.py
+diff --git a/NewsMind/__init__.py b/archive/NewsMind/__init__.py
+similarity index 100%
+rename from NewsMind/__init__.py
+rename to archive/NewsMind/__init__.py
+diff --git a/NewsMind/channel_router.py b/archive/NewsMind/channel_router.py
+similarity index 100%
+rename from NewsMind/channel_router.py
+rename to archive/NewsMind/channel_router.py
+diff --git a/NewsMind/config_loader.py b/archive/NewsMind/config_loader.py
+similarity index 100%
+rename from NewsMind/config_loader.py
+rename to archive/NewsMind/config_loader.py
+diff --git a/NewsMind/conviction.py b/archive/NewsMind/conviction.py
+similarity index 100%
+rename from NewsMind/conviction.py
+rename to archive/NewsMind/conviction.py
+diff --git a/NewsMind/event_calendar.py b/archive/NewsMind/event_calendar.py
+similarity index 100%
+rename from NewsMind/event_calendar.py
+rename to archive/NewsMind/event_calendar.py
+diff --git a/NewsMind/event_classifier.py b/archive/NewsMind/event_classifier.py
+similarity index 100%
+rename from NewsMind/event_classifier.py
+rename to archive/NewsMind/event_classifier.py
+diff --git a/NewsMind/event_windows.py b/archive/NewsMind/event_windows.py
+similarity index 100%
+rename from NewsMind/event_windows.py
+rename to archive/NewsMind/event_windows.py
+diff --git a/NewsMind/headline_scanner.py b/archive/NewsMind/headline_scanner.py
+similarity index 100%
+rename from NewsMind/headline_scanner.py
+rename to archive/NewsMind/headline_scanner.py
+diff --git a/NewsMind/integration.py b/archive/NewsMind/integration.py
+similarity index 100%
+rename from NewsMind/integration.py
+rename to archive/NewsMind/integration.py
+diff --git a/NewsMind/liquidity_session.py b/archive/NewsMind/liquidity_session.py
+similarity index 100%
+rename from NewsMind/liquidity_session.py
+rename to archive/NewsMind/liquidity_session.py
+diff --git a/NewsMind/narrative_tracker.py b/archive/NewsMind/narrative_tracker.py
+similarity index 100%
+rename from NewsMind/narrative_tracker.py
+rename to archive/NewsMind/narrative_tracker.py
+diff --git a/NewsMind/news_data.py b/archive/NewsMind/news_data.py
+similarity index 100%
+rename from NewsMind/news_data.py
+rename to archive/NewsMind/news_data.py
+diff --git a/NewsMind/news_narrative.py b/archive/NewsMind/news_narrative.py
+similarity index 100%
+rename from NewsMind/news_narrative.py
+rename to archive/NewsMind/news_narrative.py
+diff --git a/NewsMind/news_regime.py b/archive/NewsMind/news_regime.py
+similarity index 100%
+rename from NewsMind/news_regime.py
+rename to archive/NewsMind/news_regime.py
+diff --git a/NewsMind/newsmind_llm.py b/archive/NewsMind/newsmind_llm.py
+similarity index 100%
+rename from NewsMind/newsmind_llm.py
+rename to archive/NewsMind/newsmind_llm.py
+diff --git a/NewsMind/precedent_engine.py b/archive/NewsMind/precedent_engine.py
+similarity index 100%
+rename from NewsMind/precedent_engine.py
+rename to archive/NewsMind/precedent_engine.py
+diff --git a/NewsMind/surprise_engine.py b/archive/NewsMind/surprise_engine.py
+similarity index 100%
+rename from NewsMind/surprise_engine.py
+rename to archive/NewsMind/surprise_engine.py
+diff --git a/NewsMind/v2/NewsMindV2.py b/archive/NewsMind/v2/NewsMindV2.py
+similarity index 100%
+rename from NewsMind/v2/NewsMindV2.py
+rename to archive/NewsMind/v2/NewsMindV2.py
+diff --git a/NewsMind/v2/__init__.py b/archive/NewsMind/v2/__init__.py
+similarity index 100%
+rename from NewsMind/v2/__init__.py
+rename to archive/NewsMind/v2/__init__.py
+diff --git a/NewsMind/v2/chase_detector.py b/archive/NewsMind/v2/chase_detector.py
+similarity index 100%
+rename from NewsMind/v2/chase_detector.py
+rename to archive/NewsMind/v2/chase_detector.py
+diff --git a/NewsMind/v2/event_scheduler.py b/archive/NewsMind/v2/event_scheduler.py
+similarity index 100%
+rename from NewsMind/v2/event_scheduler.py
+rename to archive/NewsMind/v2/event_scheduler.py
+diff --git a/NewsMind/v2/freshness.py b/archive/NewsMind/v2/freshness.py
+similarity index 100%
+rename from NewsMind/v2/freshness.py
+rename to archive/NewsMind/v2/freshness.py
+diff --git a/NewsMind/v2/models.py b/archive/NewsMind/v2/models.py
+similarity index 100%
+rename from NewsMind/v2/models.py
+rename to archive/NewsMind/v2/models.py
+diff --git a/NewsMind/v2/permission.py b/archive/NewsMind/v2/permission.py
+similarity index 100%
+rename from NewsMind/v2/permission.py
+rename to archive/NewsMind/v2/permission.py
+diff --git a/NewsMind/v2/sources.py b/archive/NewsMind/v2/sources.py
+similarity index 100%
+rename from NewsMind/v2/sources.py
+rename to archive/NewsMind/v2/sources.py
+diff --git a/OandaAdapter/__init__.py b/archive/OandaAdapter/__init__.py
+similarity index 100%
+rename from OandaAdapter/__init__.py
+rename to archive/OandaAdapter/__init__.py
+diff --git a/OandaAdapter/account.py b/archive/OandaAdapter/account.py
+similarity index 100%
+rename from OandaAdapter/account.py
+rename to archive/OandaAdapter/account.py
+diff --git a/OandaAdapter/broker.py b/archive/OandaAdapter/broker.py
+similarity index 100%
+rename from OandaAdapter/broker.py
+rename to archive/OandaAdapter/broker.py
+diff --git a/OandaAdapter/client.py b/archive/OandaAdapter/client.py
+similarity index 100%
+rename from OandaAdapter/client.py
+rename to archive/OandaAdapter/client.py
+diff --git a/OandaAdapter/feed.py b/archive/OandaAdapter/feed.py
+similarity index 100%
+rename from OandaAdapter/feed.py
+rename to archive/OandaAdapter/feed.py
+diff --git a/OandaAdapter/instruments.py b/archive/OandaAdapter/instruments.py
+similarity index 100%
+rename from OandaAdapter/instruments.py
+rename to archive/OandaAdapter/instruments.py
+diff --git a/archive/README.md b/archive/README.md
+new file mode 100644
+index 0000000..9528de9
+--- /dev/null
++++ b/archive/README.md
+@@ -0,0 +1,29 @@
++# archive/ — أرشيف الكود القديم (HYDRA V1/V2)
++
++هذا المجلد يحتوي على الإصدارات القديمة قبل V3. **محفوظة كمرجع تاريخي فقط** — لا يستوردها أي كود نشط.
++
++## المحتوى
++
++| المجلد/الملف | كان يستخدم في | بديله في V3 |
++|---|---|---|
++| `ChartMind/` | الإصدار 1 (التحليل الفني) | `chartmind/v3/` |
++| `ChartMindV2/` | الإصدار 2 | `chartmind/v3/` |
++| `MarketMind/` | الإصدار 1 (الماكرو) | `marketmind/v3/` |
++| `NewsMind/` | الإصدار 1 (الأخبار) — YAML configs انتقلت إلى `config/news/` | `newsmind/v2/` |
++| `GateMind/` | الإصدار 1 (البوابة) | `gatemind/v3/` |
++| `SmartNoteBook/` | الإصدار 1 (الذاكرة) | `smartnotebook/v3/` |
++| `LLMCore/` | LLM helpers قديمة | `llm/` |
++| `OandaAdapter/` | محوّل OANDA قديم | يحتاج إعادة كتابة لـ V3 |
++| `Engine.py` | المنسّق القديم | `engine/v3/EngineV3.py` |
++| `main.py` | حلقة polling قديمة | `main_v3.py` (في الجذر) و `engine/v3/main_v3.py` |
++| `position_monitor.py` | غير موصول بـ V3 | TBD |
++
++## ملاحظات مهمة
++
++- **بعض الأفكار في الكود القديم لم تنتقل بعد إلى V3:**
++  - `SmartNoteBook/journal.py` — journal مفصّل
++  - `SmartNoteBook/post_mortem.py` — تشريح بعد الإغلاق
++  - `ChartMind/wyckoff.py` — تحليل Wyckoff
++  - `NewsMind/narrative_tracker.py` — تتبّع روايات السوق
++  - `OandaAdapter/` — يحتاج migration إلى V3 broker interface
++- إذا احتجت أيّ من هذه لاحقاً، استخدم `git log --follow archive/<path>` لرؤية تاريخ التعديل.
+diff --git a/SmartNoteBook/SmartNoteBook.py b/archive/SmartNoteBook/SmartNoteBook.py
+similarity index 100%
+rename from SmartNoteBook/SmartNoteBook.py
+rename to archive/SmartNoteBook/SmartNoteBook.py
+diff --git a/SmartNoteBook/__init__.py b/archive/SmartNoteBook/__init__.py
+similarity index 100%
+rename from SmartNoteBook/__init__.py
+rename to archive/SmartNoteBook/__init__.py
+diff --git a/SmartNoteBook/bias_detector.py b/archive/SmartNoteBook/bias_detector.py
+similarity index 100%
+rename from SmartNoteBook/bias_detector.py
+rename to archive/SmartNoteBook/bias_detector.py
+diff --git a/SmartNoteBook/briefing.py b/archive/SmartNoteBook/briefing.py
+similarity index 100%
+rename from SmartNoteBook/briefing.py
+rename to archive/SmartNoteBook/briefing.py
+diff --git a/SmartNoteBook/journal.py b/archive/SmartNoteBook/journal.py
+similarity index 100%
+rename from SmartNoteBook/journal.py
+rename to archive/SmartNoteBook/journal.py
+diff --git a/SmartNoteBook/lessons.py b/archive/SmartNoteBook/lessons.py
+similarity index 100%
+rename from SmartNoteBook/lessons.py
+rename to archive/SmartNoteBook/lessons.py
+diff --git a/SmartNoteBook/llm_grader.py b/archive/SmartNoteBook/llm_grader.py
+similarity index 100%
+rename from SmartNoteBook/llm_grader.py
+rename to archive/SmartNoteBook/llm_grader.py
+diff --git a/SmartNoteBook/memory_injector.py b/archive/SmartNoteBook/memory_injector.py
+similarity index 100%
+rename from SmartNoteBook/memory_injector.py
+rename to archive/SmartNoteBook/memory_injector.py
+diff --git a/SmartNoteBook/metrics.py b/archive/SmartNoteBook/metrics.py
+similarity index 100%
+rename from SmartNoteBook/metrics.py
+rename to archive/SmartNoteBook/metrics.py
+diff --git a/SmartNoteBook/patterns.py b/archive/SmartNoteBook/patterns.py
+similarity index 100%
+rename from SmartNoteBook/patterns.py
+rename to archive/SmartNoteBook/patterns.py
+diff --git a/SmartNoteBook/post_mortem.py b/archive/SmartNoteBook/post_mortem.py
+similarity index 100%
+rename from SmartNoteBook/post_mortem.py
+rename to archive/SmartNoteBook/post_mortem.py
+diff --git a/SmartNoteBook/pre_mortem.py b/archive/SmartNoteBook/pre_mortem.py
+similarity index 100%
+rename from SmartNoteBook/pre_mortem.py
+rename to archive/SmartNoteBook/pre_mortem.py
+diff --git a/main.py b/archive/main.py
+similarity index 100%
+rename from main.py
+rename to archive/main.py
+diff --git a/position_monitor.py b/archive/position_monitor.py
+similarity index 100%
+rename from position_monitor.py
+rename to archive/position_monitor.py
+diff --git a/NewsMind/config/events.yaml b/config/news/events.yaml
+similarity index 100%
+rename from NewsMind/config/events.yaml
+rename to config/news/events.yaml
+diff --git a/NewsMind/config/keywords.yaml b/config/news/keywords.yaml
+similarity index 100%
+rename from NewsMind/config/keywords.yaml
+rename to config/news/keywords.yaml
+diff --git a/NewsMind/config/narratives.yaml b/config/news/narratives.yaml
+similarity index 100%
+rename from NewsMind/config/narratives.yaml
+rename to config/news/narratives.yaml
+diff --git a/NewsMind/config/sources.yaml b/config/news/sources.yaml
+similarity index 100%
+rename from NewsMind/config/sources.yaml
+rename to config/news/sources.yaml
+diff --git a/main_v3.py b/main_v3.py
+new file mode 100644
+index 0000000..61c982a
+--- /dev/null
++++ b/main_v3.py
+@@ -0,0 +1,21 @@
++# -*- coding: utf-8 -*-
++"""HYDRA V3 — root entry point (shim).
++
++Forwards to engine.v3.main_v3 with a portable PYTHONPATH so this works
++both inside Docker (/app) and on a developer laptop.
++"""
++from __future__ import annotations
++import os
++import sys
++from pathlib import Path
++
++# Add project root to PYTHONPATH so all 5 brain packages are importable.
++ROOT = Path(__file__).resolve().parent
++sys.path.insert(0, str(ROOT))
++
++# Honour Docker's /app convention if it exists (for Hostinger compatibility).
++if os.path.isdir("/app") and "/app" not in sys.path:
++    sys.path.insert(0, "/app")
++
++# Now hand off to the actual loop.
++from engine.v3 import main_v3  # noqa: F401  (executes the loop on import)
+-- 
+2.34.1
+
+
+From 30c83efd58f7801931e83e096fd3e187c3cfc74c Mon Sep 17 00:00:00 2001
+From: "Claude (HYDRA cleanup)" <claude@hydra.local>
+Date: Mon, 27 Apr 2026 04:10:34 +0000
+Subject: [PATCH 2/2] =?UTF-8?q?feat:=20rename=20NewsMind=20V2=E2=86=92V3,?=
+ =?UTF-8?q?=20drop=20Hostinger/Docker,=20laptop-only?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- Rename newsmind/v2/ → newsmind/v3/ and class NewsMindV2 → NewsMindV3
+- Update all imports across chartmind/marketmind/gatemind/smartnotebook/engine
+- Delete Dockerfile, docker-compose.yml, hostinger-deploy.yml
+- Strip /app hardcoding from main_v3.py and engine/v3/main_v3.py
+- Strip docker exec references from scripts/run_backtest.py
+- Rewrite README.md for laptop-only Python execution
+- Update README to reflect 5 brains all V3 + clean folder structure
+
+All 5 brains import cleanly from V3 lowercase namespaces:
+  chartmind.v3 / marketmind.v3 / newsmind.v3 / gatemind.v3 / smartnotebook.v3
+---
+ Dockerfile                                    |  26 ---
+ README.md                                     | 177 +++++++++---------
+ docker-compose.yml                            |  39 ----
+ engine/v3/EngineV3.py                         |   2 +-
+ engine/v3/integration_proof.py                |   8 +-
+ engine/v3/main_v3.py                          |   2 +-
+ hostinger-deploy.yml                          |  93 ---------
+ main_v3.py                                    |  16 +-
+ .../{v2/NewsMindV2.py => v3/NewsMindV3.py}    |   4 +-
+ newsmind/{v2 => v3}/__init__.py               |   4 +-
+ newsmind/{v2 => v3}/cert_v3.py                |   6 +-
+ newsmind/{v2 => v3}/cert_v3_output.txt        |   0
+ newsmind/{v2 => v3}/chase_detector.py         |   0
+ newsmind/{v2 => v3}/event_scheduler.py        |   0
+ newsmind/{v2 => v3}/freshness.py              |   0
+ newsmind/{v2 => v3}/intelligence.py           |   0
+ newsmind/{v2 => v3}/iq_full_output.txt        |   0
+ newsmind/{v2 => v3}/models.py                 |   0
+ newsmind/{v2 => v3}/permission.py             |   0
+ newsmind/{v2 => v3}/sources.py                |   0
+ newsmind/{v2 => v3}/test_intelligence.py      |   8 +-
+ newsmind/{v2 => v3}/test_newsmind_v2.py       |  24 +--
+ scripts/run_backtest.py                       |   8 +-
+ 23 files changed, 123 insertions(+), 294 deletions(-)
+ delete mode 100644 Dockerfile
+ delete mode 100644 docker-compose.yml
+ delete mode 100755 hostinger-deploy.yml
+ rename newsmind/{v2/NewsMindV2.py => v3/NewsMindV3.py} (99%)
+ rename newsmind/{v2 => v3}/__init__.py (94%)
+ rename newsmind/{v2 => v3}/cert_v3.py (98%)
+ rename newsmind/{v2 => v3}/cert_v3_output.txt (100%)
+ rename newsmind/{v2 => v3}/chase_detector.py (100%)
+ rename newsmind/{v2 => v3}/event_scheduler.py (100%)
+ rename newsmind/{v2 => v3}/freshness.py (100%)
+ rename newsmind/{v2 => v3}/intelligence.py (100%)
+ rename newsmind/{v2 => v3}/iq_full_output.txt (100%)
+ rename newsmind/{v2 => v3}/models.py (100%)
+ rename newsmind/{v2 => v3}/permission.py (100%)
+ rename newsmind/{v2 => v3}/sources.py (100%)
+ rename newsmind/{v2 => v3}/test_intelligence.py (99%)
+ rename newsmind/{v2 => v3}/test_newsmind_v2.py (96%)
+
+diff --git a/Dockerfile b/Dockerfile
+deleted file mode 100644
+index 466f15c..0000000
+--- a/Dockerfile
++++ /dev/null
+@@ -1,26 +0,0 @@
+-FROM python:3.11-slim
+-
+-# System deps for pandas/numpy (used by MarketMind when data is supplied).
+-RUN apt-get update && \
+-    apt-get install -y --no-install-recommends \
+-        gcc libffi-dev && \
+-    rm -rf /var/lib/apt/lists/*
+-
+-WORKDIR /app
+-
+-# Install Python requirements (minimal - most of the code uses stdlib only).
+-COPY requirements.txt /app/requirements.txt
+-RUN pip install --no-cache-dir -r /app/requirements.txt
+-
+-# Copy all source code.
+-COPY . /app
+-
+-# Ensure state directories exist and are writable.
+-RUN mkdir -p /app/NewsMind/state && chmod -R a+rwx /app/NewsMind/state
+-
+-ENV PYTHONPATH=/app
+-ENV PYTHONUNBUFFERED=1
+-ENV POLL_INTERVAL_SEC=60
+-
+-# Run the live loop.
+-CMD ["python", "/app/engine/v3/main_v3.py"]
+diff --git a/README.md b/README.md
+index ec79c8b..1c442f7 100644
+--- a/README.md
++++ b/README.md
+@@ -1,19 +1,15 @@
+-# NewsMind Trading System
++# HYDRA V3 — نظام تداول بخمسة عقول
+ 
+-Five-brain trading system for EUR/USD with optional LLM reasoning on
+-top of every brain. Runs on a VPS alongside RSSHub.
++نظام تداول EUR/USD مبنيّ على ٥ عقول مستقلة + منسّق + طبقة LLM اختيارية. **يشتغل محلياً على لابتوب بـ Python 3.10+ — لا VPS، لا Docker.**
+ 
+-## Architecture
++## البنية المعمارية
+ 
+-The system is composed of five independently-testable brains plus an
+-orchestrator. Each brain owns one cognitive responsibility; none of
+-them imports another brain directly — they meet only inside `Engine`.
++النظام يتكوّن من خمسة عقول قابلة للاختبار باستقلال + منسّق. كل عقل يتولّى مسؤولية معرفية واحدة؛ لا يستورد أي عقل من الآخر — يلتقون فقط داخل `Engine`.
+ 
+ ```
+ ┌────────────┐   ┌────────────┐   ┌────────────┐
+ │ ChartMind  │   │ MarketMind │   │  NewsMind  │
+-│ (TA / SMC) │   │ (DXY/RORO) │   │ (events &  │
+-│            │   │            │   │ narratives)│
++│  V3 (TA)   │   │ V3 (Macro) │   │  V3 (News) │
+ └─────┬──────┘   └─────┬──────┘   └─────┬──────┘
+       │                │                │
+       │   BrainGrade   │  BrainGrade    │  BrainGrade
+@@ -21,100 +17,95 @@ them imports another brain directly — they meet only inside `Engine`.
+                        ▼
+                  ┌──────────┐         ┌────────────────┐
+                  │ GateMind │ ◀─────▶ │ SmartNoteBook  │
+-                 │ kill +   │         │ journal +      │
+-                 │ size +   │         │ post/pre-mortem│
+-                 │ route    │         │ + lessons +    │
+-                 └────┬─────┘         │ briefing +     │
+-                      │               │ memory inject  │
+-                      ▼               └────────────────┘
++                 │ V3 (Gate)│         │  V3 (Memory)   │
++                 └────┬─────┘         └────────────────┘
++                      ▼
+               ┌──────────────┐
+-              │  Engine.py   │  composes everything with
+-              │  main.py     │  halt-first + memory-first precedence
++              │  EngineV3    │  ينسّق العقول الخمسة
++              │  main_v3.py  │  بقاعدة halt-first + memory-first
+               └──────────────┘
++```
++
++| العقل | الدور الميكانيكي |
++|---|---|
++| **ChartMind V3** | تحليل فني (Price Action / SMC / ICT / Wyckoff). ينتج `TradePlan`. |
++| **MarketMind V3** | ماكرو (DXY synthetic / RORO / strength index). ينتج `MarketContext`. |
++| **NewsMind V3** | أحداث مجدولة + headlines + narratives. ينتج `NewsContext`. |
++| **GateMind V3** | البوابة الوحيدة: kill-switches + sizing + routing. لا bypass. |
++| **SmartNoteBook V3** | الذاكرة المؤسسية: journal + post/pre-mortem + lessons. |
++
++`EngineV3` يفرض ٣ قواعد أولوية:
++1. **Halt-first** — أي blackout/halt/kill يلغي التداول حتى مع plan ممتاز.
++2. **Memory-first** — SmartNoteBook يحقن lessons في كل عقل قبل تكوين grade.
++3. **LLM downgrades only** — طبقة LLM تخفّض فقط ولا ترفع. Asymmetric authority.
++
++## التشغيل المحلي على Windows
++
++### المتطلبات
++- Python 3.10+ (مع `Add to PATH` مفعّلاً)
++- Git for Windows
++- حساب OANDA (practice مفضّل في البداية)
++- مفتاح API (OpenAI أو Anthropic — اختياري للـ LLM)
++
++### خطوات التثبيت
++
++```powershell
++cd $env:USERPROFILE\Documents
++git clone https://github.com/Alghananim/newsmind.git hydra-v3
++cd hydra-v3
++python -m venv .venv
++.\.venv\Scripts\python.exe -m pip install -r requirements.txt
++Copy-Item .env.example .env
++notepad .env   # عبّي مفاتيح API
++```
++
++### التشغيل
+ 
+-LLM augmentation (optional, opt-in via OPENAI_API_KEY):
+-       │
+-       ▼ each brain's *_llm.py wrapper runs in parallel after
+-         its mechanical analysis; downgrades only, never upgrades.
+-         Senior-reviewer LLM sits above the gate pass.
+-         LLM grader rewrites the post-mortem narrative on close.
++```powershell
++cd $env:USERPROFILE\Documents\hydra-v3
++.\.venv\Scripts\python.exe main_v3.py
+ ```
+ 
+-| Brain | Mechanical role | LLM role |
+-|---|---|---|
+-| **ChartMind** | technical analysis (price action, candles, ICT/SMC, indicators); produces a `TradePlan` | reasons over the plan against committed lessons + bias flags + pre-mortem; can downgrade confidence or veto |
+-| **MarketMind** | cross-asset macro (DXY synthetic, RORO, USD/EUR strength composites); produces `MarketContext` | interprets the macro picture as a trader would (Chandler/Laidi/Soros canon); can recommend halt |
+-| **NewsMind** | scheduled events + unscheduled headlines + narrative tracking; produces `NewsContext` | reads the *narrative state* (Shiller/Kahneman/Taleb canon); can mark do_not_trade |
+-| **GateMind** | composes brain grades, runs kill-switches, sizes the trade, routes to broker, ledgers everything | senior-reviewer over the gate pass; can approve as-is, cut size, or reject. Never upgrades. |
+-| **SmartNoteBook** | institutional memory: journal, post/pre-mortem, pattern mining, bias detection, lesson distillation, daily briefing, per-brain memory injection | LLM grader rewrites the post-mortem skeleton into a journal-quality narrative on every close |
+-
+-`Engine.py` enforces three precedence rules:
+-
+-1. **Halt-first** — if NewsMind says blackout, MarketMind says halt,
+-   or any GateMind kill-switch fires, no trade is taken even with a
+-   clean ChartMind setup. (Schwager's *Market Wizards* canon: refusing
+-   trades is the edge.)
+-2. **Memory-first** — SmartNoteBook is consulted *before* the brains
+-   form their grades. Each brain receives an injection block (committed
+-   lessons, recent bias flags, pre-mortem warnings) so yesterday's
+-   journal evidence becomes today's discipline (Steenbarger).
+-3. **LLM downgrades only** — when LLM mode is on, the brains' LLM
+-   wrappers can lower confidence or veto a trade, never upgrade or
+-   approve a trade the mechanical layer rejected. Asymmetric authority
+-   is the right design (Carver, *Systematic Trading*).
+-
+-`main.py` runs the long-lived polling loop inside Docker.
+-
+-## Deploy on Hostinger VPS
+-
+-1. **RSSHub must already be running** on the same VPS (via Hostinger
+-   Docker Manager catalog template). Note its project name (e.g.,
+-   `rsshub-cs4k`) because `docker-compose.yml` references its
+-   external network.
+-
+-2. **Provide secrets** in the Hostinger UI (Settings → Environment
+-   Variables). At minimum:
+-   - `OPENAI_API_KEY` — required for LLM thinking. Without it, the
+-     brains run mechanical-only and the loop logs `LLM enabled: False`.
+-   Optional:
+-   - `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID` — Telegram fill notifications
+-   - `TWITTER_AUTH_TOKEN` — Twitter sources via RSSHub
+-
+-3. In Hostinger Docker Manager, create a new Compose project from
+-   this repository's `docker-compose.yml`.
+-
+-4. Hostinger builds the image from the `Dockerfile` and starts the
+-   container. Logs in the Hostinger UI show:
+-     - the boot-time SmartNoteBook briefing,
+-     - a one-line status every poll cycle (`items=… events=… | … |
+-       cost_today=$X.XX calls=N`),
+-     - a periodic morning-briefing block (default once per hour).
+-
+-## Local development
+-
+-```bash
+-cp .env.example .env       # then fill in OPENAI_API_KEY
+-pip install -r requirements.txt
+-python main.py
++أو دبل-كليك على `HYDRA V3.bat` على سطح المكتب (إذا ركّبت اختصار سطح المكتب).
++
++## بنية المجلدات
++
++```
++hydra-v3/
++├── chartmind/v3/         ← العقل #1
++├── marketmind/v3/        ← العقل #2
++├── newsmind/v3/          ← العقل #3
++├── gatemind/v3/          ← العقل #4
++├── smartnotebook/v3/     ← العقل #5
++├── engine/v3/            ← المنسّق + safety_rails
++├── llm/                  ← LLM layer (OpenAI/Anthropic)
++├── config/news/          ← YAML: events, sources, narratives, keywords
++├── Backtest/             ← أدوات الباك-تست (utility)
++├── scripts/              ← walk-forward + variants tests
++├── archive/              ← V1/V2 محفوظ كمرجع تاريخي (راجع archive/README.md)
++└── main_v3.py            ← نقطة الدخول
+ ```
+ 
+-`.env` is gitignored — your real key never leaves your machine. The
+-loop reads `OPENAI_API_KEY` from the environment; with it set,
+-`ENABLE_LLM=auto` (the default) flips LLM mode on automatically.
++## ضوابط الأمان (Safety)
+ 
+-## Configuration
++- `ABSOLUTE_MAX_RISK_PCT = 0.5%` — الكود يرفض أي قيمة أعلى بـ `SystemExit`.
++- `risk_pct_per_trade = 0.25%` افتراضياً.
++- `default-deny` متعدد الطبقات: عند الشك → block.
++- **GateMind بوابة وحيدة**: لا تنفيذ بدون موافقتها (لا bypass).
++- **SmartNoteBook يسجّل كل قرار** بـ `audit_id` متطابق.
++- **safety_rails (12 فحص)** قبل أي أمر — راجع `engine/v3/safety_rails.py`.
+ 
+-### YAML (NewsMind)
++> ⚠️ راجع `CREDENTIAL_SAFETY_NOTICE.md` — أي مفاتيح كانت في commits قديمة لازم تُلغى وتُستبدل.
+ 
+-* `NewsMind/config/events.yaml` — 70+ scheduled + 18 unscheduled events
+-* `NewsMind/config/sources.yaml` — 40+ free RSS/JSON sources + 20 Twitter groups
+-* `NewsMind/config/narratives.yaml` — 11 active macro narratives
+-* `NewsMind/config/keywords.yaml` — Tier-X keyword dictionaries
++## التطوير القادم
+ 
+-Edit YAML, push to GitHub, click Rebuild in Hostinger.
++- إصلاحات ما بعد التدقيق (راجع `HYDRA_V3_AUDIT.md`):
++  - توصيل أنابيب البيانات الحقيقية (NewsMind RSS، OANDA candles)
++  - تثبيت counters على القرص بدل RAM
++  - إضافة سيناريو positive في integration_proof
++- استراتيجيات بحثية جديدة (mean-reversion / statistical edge)
++- توسيع backtest على أزواج إضافية
+ 
+-### Environment variables (main.py)
++## الترخيص و المسؤولية
+ 
+-| Variable | Default | Purpose |
+-|---|---|---|
+-| `OPENAI_API_KEY`           | unset    
+\ No newline at end of file
++هذا نظام بحث وتطوير. **التداول الحقيقي على مسؤوليتك** — راجع نتائج الـ backtest في `AUDIT_VERDICT.md` و `DIAGNOSTIC.md` قبل أي قرار live.
+diff --git a/docker-compose.yml b/docker-compose.yml
+deleted file mode 100644
+index b195cb1..0000000
+--- a/docker-compose.yml
++++ /dev/null
+@@ -1,39 +0,0 @@
+-version: "3.9"
+-
+-services:
+-  newsmind:
+-    build:
+-      context: .
+-      dockerfile: Dockerfile
+-    container_name: newsmind
+-    restart: unless-stopped
+-    environment:
+-      # ---- core loop ----------------------------------------------
+-      - POLL_INTERVAL_SEC=60
+-      - CHECKPOINT_EVERY_CYCLES=5
+-      - BRIEFING_EVERY_CYCLES=60
+-      - PAIR=EUR/USD
+-      - STATE_DIR=/app/NewsMind/state
+-
+-      # ---- LLM (OpenAI) -------------------------------------------
+-      # The actual key value MUST be provided via Hostinger UI
+-      # (Settings -> Environment Variables) or a sibling .env file —
+-      # never commit the real value to git.
+-      # The `:-` syntax means "default to empty string when unset" so
+-      # the container boots in mechanical-only mode if no key is set.
+-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+-      - LLM_MODEL=${LLM_MODEL:-gpt-5}
+-      - ENABLE_LLM=${ENABLE_LLM:-auto}            # auto = on if OPENAI_API_KEY set
+-      - INJECTION_LANGUAGE=${INJECTION_LANGUAGE:-en}
+-
+-      # ---- OANDA (live data + broker) -----------------------------
+-      # Same posture as OPENAI_API_KEY — provided via Hostinger UI,
+-      # never committed to git. Use the practice account first.
+-      - OANDA_API_TOKEN=${OANDA_API_TOKEN:-}
+-      - OANDA_ACCOUNT_ID=${OANDA_ACCOUNT_ID:-}
+-      - OANDA_ENVIRONMENT=${OANDA_ENVIRONMENT:-practice}
+-      - OANDA_GRANULARITY=${OANDA_GRANULARITY:-M15}
+-      - ENABLE_OANDA=${ENABLE_OANDA:-auto}        # auto = on if both vars set
+-
+-      # ---- optional integrations ----------------------------------
+- 
+\ No newline at end of file
+diff --git a/engine/v3/EngineV3.py b/engine/v3/EngineV3.py
+index a6925bc..7655d0e 100755
+--- a/engine/v3/EngineV3.py
++++ b/engine/v3/EngineV3.py
+@@ -19,7 +19,7 @@ from typing import Optional
+ import os
+ 
+ # Ensure brain packages are importable (caller must have outputs/ on sys.path)
+-from newsmind.v2 import NewsMindV2
++from newsmind.v3 import NewsMindV3
+ from marketmind.v3 import MarketMindV3
+ from chartmind.v3 import ChartMindV3
+ from gatemind.v3 import GateMindV3, BrainSummary, SystemState
+diff --git a/engine/v3/integration_proof.py b/engine/v3/integration_proof.py
+index 9e5f5c0..c861364 100755
+--- a/engine/v3/integration_proof.py
++++ b/engine/v3/integration_proof.py
+@@ -12,8 +12,8 @@ from datetime import datetime, timedelta, timezone
+ sys.path.insert(0, "/sessions/happy-zealous-volta/mnt/outputs")
+ 
+ # Import all 5 brains
+-from newsmind.v2 import NewsMindV2, NewsItem
+-from newsmind.v2.sources import NewsSource
++from newsmind.v3 import NewsMindV3, NewsItem
++from newsmind.v3.sources import NewsSource
+ from marketmind.v3 import MarketMindV3, Bar as MMBar
+ from chartmind.v3 import ChartMindV3, Bar as CMBar
+ from gatemind.v3 import GateMindV3
+@@ -94,7 +94,7 @@ def run_scenario(name, *, news_headline, news_age_min=1, market_slope, chart_slo
+     # === STEP 1: NEWSMIND ===
+     print("\n[STEP 1] NewsMind.evaluate()")
+     sources = news_for_scenario(news_headline)
+-    nm = NewsMindV2(pair="EUR/USD", calendar=None, sources=sources)
++    nm = NewsMindV3(pair="EUR/USD", calendar=None, sources=sources)
+     eur_bars = make_bars(80, slope=market_slope*1.0, noise=chart_noise, seed=1)
+     nv = nm.evaluate(now_utc=NOW, recent_bars=eur_bars, current_bar=eur_bars[-1])
+     print(f"  → grade={nv.grade}  permission={nv.trade_permission}")
+@@ -245,7 +245,7 @@ NOW_OUT = datetime(2026, 4, 26, 6, 0, 0, tzinfo=timezone.utc)   # NY 02:00 — o
+ 
+ # Run with NOW_OUT — gate must block on session even if other brains say allow
+ sources = news_for_scenario("US CPI prints 2.0% vs 3.0% expected — soft inflation")
+-nm = NewsMindV2(pair="EUR/USD", calendar=None, sources=sources)
++nm = NewsMindV3(pair="EUR/USD", calendar=None, sources=sources)
+ eur_bars = make_bars(80, slope=-0.00012, noise=0.000005, seed=1)
+ nv = nm.evaluate(now_utc=NOW_OUT, recent_bars=eur_bars, current_bar=eur_bars[-1])
+ print(f"\n[STEP 1] NewsMind: grade={nv.grade} perm={nv.trade_permission}")
+diff --git a/engine/v3/main_v3.py b/engine/v3/main_v3.py
+index 2e6bf91..c254e36 100644
+--- a/engine/v3/main_v3.py
++++ b/engine/v3/main_v3.py
+@@ -18,7 +18,7 @@ log.info("=" * 80)
+ log.info("Engine V3 — 5-brain integrated trading system + OpenAI layer")
+ log.info("=" * 80)
+ 
+-sys.path.insert(0, "/app")
++# Path setup handled by root main_v3.py
+ 
+ # Brain imports
+ try:
+diff --git a/hostinger-deploy.yml b/hostinger-deploy.yml
+deleted file mode 100755
+index d04df89..0000000
+--- a/hostinger-deploy.yml
++++ /dev/null
+@@ -1,93 +0,0 @@
+-# Hostinger-deploy.yml — self-contained Compose for Hostinger Docker Manager.
+-#
+-# This file pulls the source from GitHub at container start, installs
+-# dependencies, and runs the live loop. It uses python:3.11-slim as
+-# the base image so Hostinger's "Compose Manually" workflow can boot
+-# it without needing a separate build step.
+-#
+-# Trade-off vs the canonical docker-compose.yml at the repo root:
+-#   * Slower first start (~90s for clone + pip install)
+-#   * Slower restart (same, because we re-clone for `latest`)
+-#   * Self-contained: no separate build pipeline needed
+-#
+-# For production with frequent deploys, consider building an image
+-# via GitHub Actions and publishing to GHCR; this file is for the
+-# fastest possible time-to-deploy on a fresh Hostinger Docker Manager.
+-#
+-# Environment variables — supply them via Hostinger Settings ->
+-# Environment Variables on this Docker project. None are required for
+-# the system to boot; missing variables degrade specific subsystems:
+-#   OPENAI_API_KEY     LLM disabled, mechanical-only
+-#   OANDA_API_TOKEN    PaperBroker, no live trading
+-#   OANDA_ACCOUNT_ID   PaperBroker, no live trading
+-#   TELEGRAM_TOKEN     Telegram notifications silenced
+-#   TELEGRAM_CHAT_ID   Telegram notifications silenced
+-
+-version: "3.9"
+-
+-services:
+-  newsmind:
+-    image: python:3.11-slim
+-    restart: unless-stopped
+-    working_dir: /app
+-    environment:
+-      # ---- core loop ----------------------------------------------
+-      - POLL_INTERVAL_SEC=60
+-      - CHECKPOINT_EVERY_CYCLES=5
+-      - BRIEFING_EVERY_CYCLES=60
+-      - PAIR=${PAIR:-EUR/USD}
+-      # ---- Production variant (per-pair OANDA-tuned) -----------
+-      # Defaults below are auto-applied per pair in main.py:
+-      #   EUR/USD -> trail_r25_risk15  (+61.46% / 2y, PF 1.62)
+-      #   USD/JPY -> jp_champion_tight_trail  (+105.43% / 2y)
+-      #   GBP/USD -> gb_ultra_risk15  (+8.63% / 2y, no halt)
+-      # Set VARIANT_FILTER explicitly to override.
+-      - VARIANT_FILTER=${VARIANT_FILTER:-}
+-      - STATE_DIR=/app/NewsMind/state
+-      - PYTHONUNBUFFERED=1
+-      - PYTHONPATH=/app
+-
+-      # ---- LLM / OANDA / Telegram (defaults to empty when unset) --
+-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+-      - LLM_MODEL=${LLM_MODEL:-gpt-5}
+-      - ENABLE_LLM=${ENABLE_LLM:-auto}
+-      - INJECTION_LANGUAGE=${INJECTION_LANGUAGE:-en}
+-      - OANDA_API_TOKEN=${OANDA_API_TOKEN:-}
+-      - OANDA_ACCOUNT_ID=${OANDA_ACCOUNT_ID:-}
+-      - OANDA_ENVIRONMENT=${OANDA_ENVIRONMENT:-practice}
+-      - OANDA_GRANULARITY=${OANDA_GRANULARITY:-M15}
+-      - ENABLE_OANDA=${ENABLE_OANDA:-auto}
+-      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN:-}
+-      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+-
+-      # ---- One-shot backtest mode --------------------------------
+-      # Set RUN_BACKTEST=true and restart the container to run the
+-      # 2-year EUR/USD backtest. Results print to docker logs.
+-      # Unset and restart to resume normal live mode.
+-      - RUN_BACKTEST=${RUN_BACKTEST:-false}
+-
+-    logging:
+-      driver: json-file
+-      options:
+-        max-size: "10m"
+-        max-file: "5"
+-
+-    # Bootstrap + run. Using `bash -c` so we can chain steps.
+-    # Idempotent: if /app/.git already exists we just `git pull`.
+-    command:
+-      - bash
+-      - -c
+-      - |
+-        set -e
+-        apt-get update -qq && apt-get install -y --no-install-recommends git ca-certificates >/dev/null 2>&1
+-        # Always do a clean clone of latest main into a temp dir, then
+-        # rsync the contents over /app. This guarantees we run the
+-        # latest code on every restart, even if the /app volume held
+-        # an older shallow clone from a previous boot.
+-        echo "[bootstrap] fetching latest main from GitHub..."
+-        rm -rf /tmp/newsmind_fresh
+-        git clone --depth 1 https://github.com/Alghananim/newsmind.git /tmp/newsmind_fresh
+-        # Preserve the .git dir for diagnostics + state-only paths
+-        # (NewsMind/state lives on a separate volume so the rsync is safe).
+-        cp -a /tmp/newsmind_fresh/. /app/
+-       
+\ No newline at end of file
+diff --git a/main_v3.py b/main_v3.py
+index 61c982a..e347373 100644
+--- a/main_v3.py
++++ b/main_v3.py
+@@ -1,21 +1,17 @@
+ # -*- coding: utf-8 -*-
+-"""HYDRA V3 — root entry point (shim).
++"""HYDRA V3 — root entry point (laptop-friendly).
+ 
+-Forwards to engine.v3.main_v3 with a portable PYTHONPATH so this works
+-both inside Docker (/app) and on a developer laptop.
++Runs locally with Python 3.10+. No Docker, no VPS — just:
++
++    cd hydra-v3
++    .\.venv\Scripts\python.exe main_v3.py
+ """
+ from __future__ import annotations
+-import os
+ import sys
+ from pathlib import Path
+ 
+-# Add project root to PYTHONPATH so all 5 brain packages are importable.
+ ROOT = Path(__file__).resolve().parent
+ sys.path.insert(0, str(ROOT))
+ 
+-# Honour Docker's /app convention if it exists (for Hostinger compatibility).
+-if os.path.isdir("/app") and "/app" not in sys.path:
+-    sys.path.insert(0, "/app")
+-
+-# Now hand off to the actual loop.
++# Hand off to the engine loop.
+ from engine.v3 import main_v3  # noqa: F401  (executes the loop on import)
+diff --git a/newsmind/v2/NewsMindV2.py b/newsmind/v3/NewsMindV3.py
+similarity index 99%
+rename from newsmind/v2/NewsMindV2.py
+rename to newsmind/v3/NewsMindV3.py
+index f5a9be5..5ccf9ba 100755
+--- a/newsmind/v2/NewsMindV2.py
++++ b/newsmind/v3/NewsMindV3.py
+@@ -1,5 +1,5 @@
+ # -*- coding: utf-8 -*-
+-"""NewsMindV2 — orchestrator for the news pipeline.
++"""NewsMindV3 — orchestrator for the news pipeline.
+ 
+ POST-AUDIT FIXES
+ ----------------
+@@ -24,7 +24,7 @@ from .permission import PermissionEngine
+ from .intelligence import IntelligenceLayer
+ 
+ 
+-class NewsMindV2:
++class NewsMindV3:
+     """Per-pair news orchestrator."""
+ 
+     def __init__(self, *, pair, calendar=None, sources=None,
+diff --git a/newsmind/v2/__init__.py b/newsmind/v3/__init__.py
+similarity index 94%
+rename from newsmind/v2/__init__.py
+rename to newsmind/v3/__init__.py
+index a033f27..b14f795 100755
+--- a/newsmind/v2/__init__.py
++++ b/newsmind/v3/__init__.py
+@@ -9,7 +9,7 @@ from .sources import (NewsSource, SourceAggregator, default_sources,
+                       TwitterOfficialSource)
+ from .permission import PermissionEngine
+ from .intelligence import IntelligenceLayer, ImpactAssessment
+-from .NewsMindV2 import NewsMindV2
++from .NewsMindV3 import NewsMindV3
+ 
+ __all__ = [
+     "NewsItem", "EventSchedule", "NewsVerdict",
+@@ -19,6 +19,6 @@ __all__ = [
+     "NewsSource", "SourceAggregator", "default_sources",
+     "ReutersWireSource", "BloombergWireSource", "ForexliveSource",
+     "InvestingCalendarSource", "TwitterOfficialSource",
+-    "PermissionEngine", "NewsMindV2",
++    "PermissionEngine", "NewsMindV3",
+     "IntelligenceLayer", "ImpactAssessment",
+ ]
+diff --git a/newsmind/v2/cert_v3.py b/newsmind/v3/cert_v3.py
+similarity index 98%
+rename from newsmind/v2/cert_v3.py
+rename to newsmind/v3/cert_v3.py
+index dccbfcd..eb068b3 100755
+--- a/newsmind/v2/cert_v3.py
++++ b/newsmind/v3/cert_v3.py
+@@ -19,8 +19,8 @@ from datetime import datetime, timedelta, timezone
+ from dataclasses import dataclass
+ 
+ sys.path.insert(0, "/sessions/happy-zealous-volta/mnt/outputs")
+-from newsmind.v2 import NewsMindV2, NewsItem
+-from newsmind.v2.sources import NewsSource
++from newsmind.v3 import NewsMindV3, NewsItem
++from newsmind.v3.sources import NewsSource
+ 
+ 
+ @dataclass
+@@ -232,7 +232,7 @@ def main():
+     fail_rows = []
+     for i, (spec, build) in enumerate(SCENARIOS, 1):
+         cfg = build()
+-        nm = NewsMindV2(pair=cfg["pair"], calendar=cfg["calendar"], sources=cfg["sources"])
++        nm = NewsMindV3(pair=cfg["pair"], calendar=cfg["calendar"], sources=cfg["sources"])
+         v = nm.evaluate(now_utc=NOW, recent_bars=cfg["bars"], current_bar=cfg["curr"])
+ 
+         # Source row
+diff --git a/newsmind/v2/cert_v3_output.txt b/newsmind/v3/cert_v3_output.txt
+similarity index 100%
+rename from newsmind/v2/cert_v3_output.txt
+rename to newsmind/v3/cert_v3_output.txt
+diff --git a/newsmind/v2/chase_detector.py b/newsmind/v3/chase_detector.py
+similarity index 100%
+rename from newsmind/v2/chase_detector.py
+rename to newsmind/v3/chase_detector.py
+diff --git a/newsmind/v2/event_scheduler.py b/newsmind/v3/event_scheduler.py
+similarity index 100%
+rename from newsmind/v2/event_scheduler.py
+rename to newsmind/v3/event_scheduler.py
+diff --git a/newsmind/v2/freshness.py b/newsmind/v3/freshness.py
+similarity index 100%
+rename from newsmind/v2/freshness.py
+rename to newsmind/v3/freshness.py
+diff --git a/newsmind/v2/intelligence.py b/newsmind/v3/intelligence.py
+similarity index 100%
+rename from newsmind/v2/intelligence.py
+rename to newsmind/v3/intelligence.py
+diff --git a/newsmind/v2/iq_full_output.txt b/newsmind/v3/iq_full_output.txt
+similarity index 100%
+rename from newsmind/v2/iq_full_output.txt
+rename to newsmind/v3/iq_full_output.txt
+diff --git a/newsmind/v2/models.py b/newsmind/v3/models.py
+similarity index 100%
+rename from newsmind/v2/models.py
+rename to newsmind/v3/models.py
+diff --git a/newsmind/v2/permission.py b/newsmind/v3/permission.py
+similarity index 100%
+rename from newsmind/v2/permission.py
+rename to newsmind/v3/permission.py
+diff --git a/newsmind/v2/sources.py b/newsmind/v3/sources.py
+similarity index 100%
+rename from newsmind/v2/sources.py
+rename to newsmind/v3/sources.py
+diff --git a/newsmind/v2/test_intelligence.py b/newsmind/v3/test_intelligence.py
+similarity index 99%
+rename from newsmind/v2/test_intelligence.py
+rename to newsmind/v3/test_intelligence.py
+index 98a657a..9beebe7 100755
+--- a/newsmind/v2/test_intelligence.py
++++ b/newsmind/v3/test_intelligence.py
+@@ -19,8 +19,8 @@ from typing import Optional
+ 
+ sys.path.insert(0, "/sessions/happy-zealous-volta/mnt/outputs")
+ 
+-from newsmind.v2 import NewsMindV2, NewsItem
+-from newsmind.v2.sources import NewsSource
++from newsmind.v3 import NewsMindV3, NewsItem
++from newsmind.v3.sources import NewsSource
+ 
+ 
+ # ----------------------------------------------------------------------
+@@ -535,11 +535,11 @@ def run_one(expect: ScenarioExpect, build) -> ScenarioResult:
+     cfg = build()
+ 
+     # Run NewsMind for EUR/USD
+-    nm_e = NewsMindV2(pair="EUR/USD", calendar=cfg["calendar"], sources=cfg["sources"])
++    nm_e = NewsMindV3(pair="EUR/USD", calendar=cfg["calendar"], sources=cfg["sources"])
+     v_e = nm_e.evaluate(now_utc=NOW, recent_bars=cfg["bars"], current_bar=cfg["curr"])
+ 
+     # Run NewsMind for USD/JPY
+-    nm_j = NewsMindV2(pair="USD/JPY", calendar=cfg["calendar"], sources=cfg["sources"])
++    nm_j = NewsMindV3(pair="USD/JPY", calendar=cfg["calendar"], sources=cfg["sources"])
+     v_j = nm_j.evaluate(now_utc=NOW, recent_bars=cfg["bars"], current_bar=cfg["curr"])
+ 
+     # Use EUR/USD verdict as the primary report (most scenarios target EUR/USD)
+diff --git a/newsmind/v2/test_newsmind_v2.py b/newsmind/v3/test_newsmind_v2.py
+similarity index 96%
+rename from newsmind/v2/test_newsmind_v2.py
+rename to newsmind/v3/test_newsmind_v2.py
+index 3f411b8..59d10f9 100755
+--- a/newsmind/v2/test_newsmind_v2.py
++++ b/newsmind/v3/test_newsmind_v2.py
+@@ -22,8 +22,8 @@ from dataclasses import dataclass
+ # Make local v2 importable
+ sys.path.insert(0, "/sessions/happy-zealous-volta/mnt/outputs")
+ 
+-from newsmind.v2 import (
+-    NewsMindV2, NewsItem, EventSchedule,
++from newsmind.v3 import (
++    NewsMindV3, NewsItem, EventSchedule,
+     PermissionEngine, FreshnessAnalyzer, ChaseDetector,
+     EventScheduler, SourceAggregator, NewsSource,
+ )
+@@ -128,7 +128,7 @@ def t1_scheduled_high_impact_event():
+     """Inside the pre-window of a scheduled NFP."""
+     nfp_time = NOW + timedelta(minutes=10)
+     cal = FakeCalendar([FakeRawEvent("NFP", nfp_time)])
+-    nm = NewsMindV2(pair="EUR/USD", calendar=cal, sources=[])
++    nm = NewsMindV3(pair="EUR/USD", calendar=cal, sources=[])
+     v = nm.evaluate(now_utc=NOW, recent_bars=calm_bars(), current_bar=calm_bars()[-1])
+     ok = v.trade_permission == "block" and "scheduled_high_impact" in v.reason
+     record("T1_scheduled_high_impact_event",
+@@ -149,7 +149,7 @@ def t2_old_news():
+         affected_pairs=("EUR/USD",),
+         confirmation_count=3,
+     )
+-    nm = NewsMindV2(pair="EUR/USD", calendar=None,
++    nm = NewsMindV3(pair="EUR/USD", calendar=None,
+                     sources=[StubSource(items=[item])])
+     v = nm.evaluate(now_utc=NOW, recent_bars=calm_bars(), current_bar=calm_bars()[-1])
+     ok = v.trade_permission in ("block", "wait") and v.grade != "A" and v.grade != "A+"
+@@ -171,7 +171,7 @@ def t3_breaking_news():
+         affected_pairs=("EUR/USD",),
+         confirmation_count=3,  # confirmed by 3 wires
+     )
+-    nm = NewsMindV2(pair="EUR/USD", calendar=None,
++    nm = NewsMindV3(pair="EUR/USD", calendar=None,
+                     sources=[StubSource(items=[item])])
+     v = nm.evaluate(now_utc=NOW, recent_bars=calm_bars(), current_bar=calm_bars()[-1])
+     ok = v.trade_permission == "allow" and v.grade in ("A", "A+", "B")
+@@ -193,7 +193,7 @@ def t4_unconfirmed_social():
+         affected_pairs=("EUR/USD",),
+         confirmation_count=1,
+     )
+-    nm = NewsMindV2(pair="EUR/USD", calendar=None,
++    nm = NewsMindV3(pair="EUR/USD", calendar=None,
+                     sources=[StubSource(name="twitter_official",
+                                         source_type="social",
+                                         items=[item])])
+@@ -219,7 +219,7 @@ def t5_multi_source_confirmed():
+     items_b = [NewsItem(source_name="bloomberg_wire", source_type="tier1_wire", **base)]
+     items_f = [NewsItem(source_name="forexlive", source_type="financial_media", **base)]
+ 
+-    nm = NewsMindV2(pair="EUR/USD", calendar=None,
++    nm = NewsMindV3(pair="EUR/USD", calendar=None,
+                     sources=[
+                         StubSource(name="reuters_wire", source_type="tier1_wire", items=items_r),
+                         StubSource(name="bloomberg_wire", source_type="tier1_wire", items=items_b),
+@@ -246,7 +246,7 @@ def t6_no_timestamp():
+         affected_pairs=("EUR/USD",),
+         confirmation_count=2,
+     )
+-    nm = NewsMindV2(pair="EUR/USD", calendar=None,
++    nm = NewsMindV3(pair="EUR/USD", calendar=None,
+                     sources=[StubSource(items=[item])])
+     v = nm.evaluate(now_utc=NOW, recent_bars=calm_bars(), current_bar=calm_bars()[-1])
+     ok = v.trade_permission in ("wait", "block")
+@@ -258,7 +258,7 @@ def t6_no_timestamp():
+ 
+ def t7_api_failure():
+     """All sources fail. Empty result set must NOT become allow."""
+-    nm = NewsMindV2(pair="EUR/USD", calendar=None,
++    nm = NewsMindV3(pair="EUR/USD", calendar=None,
+                     sources=[FailingSource()])
+     v = nm.evaluate(now_utc=NOW, recent_bars=calm_bars(), current_bar=calm_bars()[-1])
+     ok = v.trade_permission in ("wait", "block")
+@@ -281,7 +281,7 @@ def t8_high_impact_news_pre_trade():
+         affected_pairs=("EUR/USD",),
+         confirmation_count=3,
+     )
+-    nm = NewsMindV2(pair="EUR/USD", calendar=cal,
++    nm = NewsMindV3(pair="EUR/USD", calendar=cal,
+                     sources=[StubSource(items=[item])])
+     v = nm.evaluate(now_utc=NOW, recent_bars=calm_bars(), current_bar=calm_bars()[-1])
+     ok = v.trade_permission == "block" and "FOMC" in v.reason
+@@ -302,7 +302,7 @@ def t9_news_after_market_already_moved():
+         affected_pairs=("EUR/USD",),
+         confirmation_count=3,
+     )
+-    nm = NewsMindV2(pair="EUR/USD", calendar=None,
++    nm = NewsMindV3(pair="EUR/USD", calendar=None,
+                     sources=[StubSource(items=[item])])
+     v = nm.evaluate(now_utc=NOW,
+                     recent_bars=calm_bars(),
+@@ -336,7 +336,7 @@ def t10_conflicting_news():
+         confirmation_count=2,
+         conflicting_sources=("reuters_wire",),
+     )
+-    nm = NewsMindV2(pair="EUR/USD", calendar=None,
++    nm = NewsMindV3(pair="EUR/USD", calendar=None,
+                     sources=[
+                         StubSource(name="reuters_wire", source_type="tier1_wire", items=[bull]),
+                         StubSource(name="bloomberg_wire", source_type="tier1_wire", items=[bear]),
+diff --git a/scripts/run_backtest.py b/scripts/run_backtest.py
+index cc4480a..82f516c 100755
+--- a/scripts/run_backtest.py
++++ b/scripts/run_backtest.py
+@@ -7,7 +7,7 @@ What this script does
+     1. Fetches 2 years of M15 EUR/USD bars from OANDA (cached on disk).
+     2. Runs the full Backtest pipeline (session filter + news calendar +
+        cost model + risk manager + ChartMind analysis).
+-    3. Saves results to /app/NewsMind/state/backtest/:
++    3. Saves results to ./state/backtest/:
+          * results.json          — machine-readable full report
+          * report.txt            — human-readable text report
+          * equity_curve.json     — daily equity samples
+@@ -17,7 +17,7 @@ What this script does
+ 
+ Run on the VPS
+ --------------
+-    docker exec newsmind python /app/scripts/run_backtest.py
++    python scripts/run_backtest.py
+ 
+ Or trigger by setting RUN_BACKTEST=true and restarting the container
+ (see main.py for the one-shot mode).
+@@ -49,7 +49,7 @@ from datetime import date, datetime, timedelta, timezone
+ from pathlib import Path
+ from typing import Optional
+ 
+-# Make project importable when run via docker exec
++# Make project importable when run from project root
+ ROOT = Path(__file__).resolve().parent.parent
+ sys.path.insert(0, str(ROOT))
+ 
+@@ -58,7 +58,7 @@ sys.path.insert(0, str(ROOT))
+ # Output directory.
+ # ----------------------------------------------------------------------
+ OUTPUT_DIR = Path(os.environ.get(
+-    "BACKTEST_OUTPUT_DIR", "/app/NewsMind/state/backtest"
++    "BACKTEST_OUTPUT_DIR", "./state/backtest"
+ ))
+ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+ CACHE_PATH = OUTPUT_DIR / "eurusd_m15.jsonl"
+-- 
+2.34.1
+

@@ -1,0 +1,89 @@
+# HYDRA V4 — keyword → bias map.
+# Used by intelligence.py to assign a directional bias from a headline when
+# no scheduled-event surprise score is available.
+#
+# Bias direction is expressed for the *home* currency of the keyword group:
+#   "hawkish" / "tight"  → currency strength
+#   "dovish"  / "loose"  → currency weakness
+#   "risk_off"           → JPY/USD bid, EUR generally offered
+#   "risk_on"            → JPY offered, EUR/risk currencies bid
+#
+# Map to pair direction is in intelligence.py (it knows USD is base of USDJPY
+# but quote of EURUSD).
+
+usd:
+  hawkish:
+    - "rate hike"
+    - "raise rates"
+    - "tighten"
+    - "tightening"
+    - "hawkish"
+    - "above expectations"
+    - "stronger than expected"
+    - "beat consensus"
+    - "inflation persistent"
+    - "no cut"
+  dovish:
+    - "rate cut"
+    - "cut rates"
+    - "ease"
+    - "easing"
+    - "dovish"
+    - "below expectations"
+    - "weaker than expected"
+    - "missed consensus"
+    - "recession"
+    - "soft landing"
+
+eur:
+  hawkish:
+    - "ecb hike"
+    - "ecb tighten"
+    - "lagarde hawkish"
+    - "eurozone inflation rises"
+    - "ecb keeps rates restrictive"
+  dovish:
+    - "ecb cut"
+    - "ecb ease"
+    - "lagarde dovish"
+    - "eurozone slowdown"
+    - "eurozone recession"
+
+jpy:
+  hawkish:
+    - "boj hike"
+    - "boj normalise"
+    - "boj normalize"
+    - "ueda hawkish"
+    - "yen intervention"
+    - "mof intervention"
+    - "abandon yccp"
+    - "abandon ycc"
+  dovish:
+    - "boj keeps ultra-loose"
+    - "boj dovish"
+    - "ueda dovish"
+    - "yen weakening tolerated"
+
+risk:
+  risk_off:
+    - "war"
+    - "geopolitical tension"
+    - "flight to safety"
+    - "market panic"
+    - "credit crunch"
+    - "bank run"
+  risk_on:
+    - "trade deal"
+    - "ceasefire"
+    - "stimulus package"
+    - "risk appetite returns"
+
+# Sources whose headlines we MAY use but cap at grade C unless a tier-1
+# authoritative source confirms. Chase social = grade C max.
+unverified_sources:
+  - "twitter"
+  - "x.com"
+  - "telegram"
+  - "reddit"
+  - "anonymous"

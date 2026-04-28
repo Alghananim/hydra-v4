@@ -1,0 +1,19 @@
+{
+  "report": {
+    "pair": "EUR_USD",
+    "granularity": "M15",
+    "total_bars": 49649,
+    "missing_bars": 384,
+    "gaps_minutes_max": 1455.0,
+    "duplicate_ts_count": 0,
+    "stale_bars_volume_zero": 0,
+    "non_complete_bars": 0,
+    "timezone_naive_count": 0,
+    "spread_avg_pips": 1.687355233740846,
+    "weekend_gaps_detected": 104,
+    "first_ts": "2024-04-28T21:00:00+00:00",
+    "last_ts": "2026-04-28T01:00:00+00:00"
+  },
+  "ok": true,
+  "reasons": []
+}

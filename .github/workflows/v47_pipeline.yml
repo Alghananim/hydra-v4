@@ -1,0 +1,136 @@
+name: HYDRA V4.7 — Backtest + War Room
+
+# Runs on manual click ("Run workflow" button on the Actions tab) and on
+# every push that touches gating logic. The job:
+#   1. Runs the resumable 2-year backtest until DONE (loops chunks).
+#   2. Runs the War Room six-step pipeline.
+#   3. Commits the updated report and artefacts back to the repo.
+#   4. Uploads everything as build artifacts (downloadable for 90 days).
+#
+# Live trading is DISABLED. No OANDA API calls. No secrets needed.
+# All inputs come from the cached bars committed to the repo.
+
+on:
+  workflow_dispatch:
+    inputs:
+      time_budget_s:
+        description: "Per-chunk wall-clock budget (seconds)"
+        default: "300"
+        type: string
+      max_chunks:
+        description: "Maximum chunks before giving up (0 = unbounded)"
+        default: "60"
+        type: string
+  push:
+    paths:
+      - "gatemind/**"
+      - "chartmind/**"
+      - "marketmind/**"
+      - "newsmind/**"
+      - "orchestrator/**"
+      - "contracts/**"
+      - "replay/**"
+      - ".github/workflows/v47_pipeline.yml"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  v47_full_pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show free disk
+        run: df -h
+
+      - name: Verify cached data exists
+        run: |
+          ls -la data_cache/EUR_USD/M15/merged.jsonl
+          ls -la data_cache/USD_JPY/M15/merged.jsonl
+          wc -l data_cache/EUR_USD/M15/merged.jsonl
+          wc -l data_cache/USD_JPY/M15/merged.jsonl
+
+      - name: Run unit tests (sanity)
+        run: |
+          PYTHONPATH=. python -m pytest gatemind/v4/tests --tb=line -q --no-header
+
+      - name: Run resumable 2-year backtest until DONE
+        env:
+          TIME_BUDGET_S: ${{ inputs.time_budget_s || '300' }}
+          MAX_CHUNKS: ${{ inputs.max_chunks || '60' }}
+        run: |
+          set -e
+          mkdir -p replay_runs/v47_2y
+          OUT=replay_runs/v47_2y
+          CHUNK=0
+          while [ ! -f "$OUT/DONE" ] ; do
+            CHUNK=$((CHUNK + 1))
+            if [ "$MAX_CHUNKS" != "0" ] && [ "$CHUNK" -gt "$MAX_CHUNKS" ] ; then
+              echo "Hit MAX_CHUNKS=$MAX_CHUNKS without DONE; stopping."
+              break
+            fi
+            echo "=== chunk $CHUNK ==="
+            PYTHONPATH=. python replay/run_v47_backtest.py \
+              --output-dir "$OUT" \
+              --time-budget-s "$TIME_BUDGET_S" \
+              --checkpoint-every 1000
+          done
+          echo "--- backtest state ---"
+          cat "$OUT/state.json" || true
+
+      - name: Run War Room investigation
+        if: always()
+        run: |
+          PYTHONPATH=. python -m replay.war_room.run_war_room \
+            --cycles replay_runs/v47_2y/cycles.jsonl \
+            --data-cache data_cache \
+            --out-dir replay_runs/v47_warroom \
+            --repo-root .
+
+      - name: Show summary
+        if: always()
+        run: |
+          echo "=== state.json ==="
+          cat replay_runs/v47_2y/state.json || true
+          echo ""
+          echo "=== war room manifest ==="
+          ls -la replay_runs/v47_warroom/ || true
+
+      - name: Upload artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hydra-v47-results
+          path: |
+            replay_runs/
+            HYDRA_4_7_TOTAL_FAILURE_INVESTIGATION_AND_PERFORMANCE_RESCUE_REPORT.md
+
+      - name: Commit results back to repo
+        if: always()
+        run: |
+          git config user.name "hydra-v47-bot"
+          git config user.email "hydra-v47-bot@users.noreply.github.com"
+          # Track only the report and human-readable artefacts; ignore the
+          # heavy SmartNoteBook ledger and per-cycle JSONL.
+          git add HYDRA_4_7_TOTAL_FAILURE_INVESTIGATION_AND_PERFORMANCE_RESCUE_REPORT.md
+          git add replay_runs/v47_warroom/*.md replay_runs/v47_warroom/*.json || true
+          git add replay_runs/v47_2y/state.json replay_runs/v47_2y/summary.json replay_runs/v47_2y/DONE 2>/dev/null || true
+          git diff --cached --stat
+          if git diff --cached --quiet ; then
+            echo "No tracked changes to commit."
+          else
+            git commit -m "hydra-4.7 automated run: backtest + war room results"
+            git push
+          fi

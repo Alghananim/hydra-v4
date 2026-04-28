@@ -1,0 +1,23 @@
+HYDRA V4 - PHASE 2 CLEANUP LOG 
+Started: Mon 04/27/2026 21:46:50.35 
+ 
+=== A. CREATE archive\ AND MOVE OBSOLETE FILES === 
+NOTE: replay\replay_news_stub.py already moved or absent. 
+ 
+=== B. ENSURE All files\ EXISTS AND MOVE REPORTS === 
+ 
+=== C. DELETE __pycache__\ DIRS RECURSIVELY === 
+(gitignored auto-generated cache; will regenerate on next test run) 
+ 
+=== D. DELETE STANDALONE *.pyc FILES === 
+Deleted standalone *.pyc files. 
+ 
+=== E. POST-CLEANUP VERIFICATION === 
+Five brain main classes still on disk? 
+  newsmind\v4\NewsMindV4.py - OK 
+  marketmind\v4\MarketMindV4.py - OK 
+  chartmind\v4\ChartMindV4.py - OK 
+  gatemind\v4\GateMindV4.py - OK 
+  smartnotebook\v4\SmartNoteBookV4.py - OK 
+ 
+Orchestrator: OK 

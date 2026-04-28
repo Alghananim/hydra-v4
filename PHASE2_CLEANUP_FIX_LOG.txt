@@ -1,0 +1,42 @@
+HYDRA V4 - PHASE 2 CLEANUP FIX LOG 
+Started: Mon 04/27/2026 21:54:41.56 
+Working dir: C:\Users\Mansur\Desktop\HYDRA V4 
+ 
+=== DELETE __pycache__\ DIRS RECURSIVELY (fixed loop) === 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\anthropic_bridge\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\chartmind\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\chartmind\v4\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\contracts\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\gatemind\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\gatemind\v4\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\live_data\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\marketmind\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\marketmind\v4\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\newsmind\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\newsmind\v4\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\orchestrator\v4\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\replay\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\smartnotebook\__pycache__ 
+DELETED: C:\Users\Mansur\Desktop\HYDRA V4\smartnotebook\v4\__pycache__ 
+ 
+=== DELETE STANDALONE *.pyc FILES (fixed) === 
+Could Not Find C:\Users\Mansur\Desktop\HYDRA V4\*.pyc
+ 
+=== COUNT REMAINING pyc FILES (should be 0) === 
+Remaining .pyc count: should be 0 
+ 
+=== REMAINING __pycache__ DIRS (should be 0) === 
+ 
+=== FIVE BRAINS PRESENCE CHECK === 
+  newsmind: OK 
+  marketmind: OK 
+  chartmind: OK 
+  gatemind: OK 
+  smartnotebook: OK 
+  orchestrator: OK 
+  replay_calendar: OK 
+  replay_newsmind: OK 
+  archive\stub: OK 
+ 
+Finished: Mon 04/27/2026 21:54:41.89 
+=== DONE === 

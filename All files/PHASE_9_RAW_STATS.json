@@ -1,0 +1,289 @@
+{
+  "run_meta": {
+    "days": 90,
+    "start_utc": "2026-01-28T01:00:00+00:00",
+    "end_utc": "2026-04-28T01:00:00+00:00",
+    "pairs": [
+      "EUR_USD",
+      "USD_JPY"
+    ],
+    "lookback_bars": 500,
+    "calendar_occurrences": 29
+  },
+  "totals": {
+    "decision_cycles_processed": 12392,
+    "errors": 0,
+    "trade_candidates_ENTER": 0,
+    "WAIT": 9,
+    "BLOCK": 12383,
+    "ORCHESTRATOR_ERROR": 0
+  },
+  "session_breakdown": {
+    "outside_window": 9284,
+    "in_window_pre_open": 1028,
+    "in_window_morning": 2080
+  },
+  "in_window_breakdown": {},
+  "brain_grade_in_window": {
+    "newsmind": {
+      "A": 3060,
+      "BLOCK": 48
+    },
+    "marketmind": {
+      "B": 1494,
+      "C": 758,
+      "BLOCK": 718,
+      "A": 138
+    },
+    "chartmind": {
+      "B": 1544,
+      "C": 831,
+      "BLOCK": 718,
+      "A": 14,
+      "A+": 1
+    }
+  },
+  "brain_decision_in_window": {
+    "newsmind": {
+      "WAIT": 3060,
+      "BLOCK": 48
+    },
+    "marketmind": {
+      "WAIT": 2390,
+      "BLOCK": 718
+    },
+    "chartmind": {
+      "WAIT": 2384,
+      "BLOCK": 718,
+      "BUY": 5,
+      "SELL": 1
+    }
+  },
+  "block_reasons_in_window": {
+    "grade_below_threshold": 3057,
+    "R7_unanimous_wait:WAIT": 9,
+    "incomplete_agreement": 6,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T09:30:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=3bdae933-0cdc-4337-bcf8-813011d55a49": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T09:30:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=01a9b37a-dd18-4a4f-bba6-ccd76bcdafed": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T09:45:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=b0b898ee-ee3f-40af-952c-a98f0541bec3": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T09:45:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=ea83420c-84da-471c-a4ab-8c6eedfa814e": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T13:00:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=3f7d7caf-1331-4c95-8c83-5f532af695df": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T13:00:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=ba3785f9-36c1-4959-9ce5-37a984f0de89": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T13:15:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=a671818d-47ac-44aa-b776-75182742fb0b": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T13:15:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=5c78e9a7-2db0-458a-8376-8917c03bd843": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T13:30:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=d4bdfd35-61af-4165-acc5-f38a03b80ea2": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T13:30:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=5f708301-596d-40c3-ab27-ade72d5cdea2": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T13:45:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=617ccc2d-9662-4d60-9e10-822c0804e7ec": 1,
+    "smartnotebook_record_failure:NonMonotonicTimestampError:timestamp_utc went backwards: new=2026-03-03T13:45:00.000000Z last=2026-03-03T21:30:00.000000Z record_id=04d7824f-ce24-430b-911a-506230a8f1c6": 1
+  },
+  "per_pair": {
+    "EUR_USD": {
+      "BLOCK": 6187,
+      "WAIT": 9
+    },
+    "USD_JPY": {
+      "BLOCK": 6196
+    }
+  },
+  "all_three_a_grade_cycles": [
+    {
+      "ts": "2026-01-29T15:00:00+00:00",
+      "symbol": "EUR_USD",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "WAIT",
+      "final_status": "WAIT",
+      "final_reason": "R7_unanimous_wait:WAIT"
+    },
+    {
+      "ts": "2026-02-17T09:15:00+00:00",
+      "symbol": "EUR_USD",
+      "session": "in_window_pre_open",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "WAIT",
+      "final_status": "WAIT",
+      "final_reason": "R7_unanimous_wait:WAIT"
+    },
+    {
+      "ts": "2026-02-23T15:00:00+00:00",
+      "symbol": "USD_JPY",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "SELL",
+      "final_status": "BLOCK",
+      "final_reason": "incomplete_agreement"
+    },
+    {
+      "ts": "2026-03-04T14:30:00+00:00",
+      "symbol": "EUR_USD",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "WAIT",
+      "final_status": "WAIT",
+      "final_reason": "R7_unanimous_wait:WAIT"
+    },
+    {
+      "ts": "2026-03-04T14:45:00+00:00",
+      "symbol": "EUR_USD",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "WAIT",
+      "final_status": "WAIT",
+      "final_reason": "R7_unanimous_wait:WAIT"
+    },
+    {
+      "ts": "2026-03-04T15:00:00+00:00",
+      "symbol": "EUR_USD",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "WAIT",
+      "final_status": "WAIT",
+      "final_reason": "R7_unanimous_wait:WAIT"
+    },
+    {
+      "ts": "2026-03-11T15:30:00+00:00",
+      "symbol": "USD_JPY",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "BUY",
+      "final_status": "BLOCK",
+      "final_reason": "incomplete_agreement"
+    },
+    {
+      "ts": "2026-03-20T14:00:00+00:00",
+      "symbol": "USD_JPY",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "BUY",
+      "final_status": "BLOCK",
+      "final_reason": "incomplete_agreement"
+    },
+    {
+      "ts": "2026-03-20T14:15:00+00:00",
+      "symbol": "USD_JPY",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "BUY",
+      "final_status": "BLOCK",
+      "final_reason": "incomplete_agreement"
+    },
+    {
+      "ts": "2026-03-26T15:15:00+00:00",
+      "symbol": "USD_JPY",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A+",
+      "c_decision": "BUY",
+      "final_status": "BLOCK",
+      "final_reason": "incomplete_agreement"
+    },
+    {
+      "ts": "2026-03-30T07:30:00+00:00",
+      "symbol": "EUR_USD",
+      "session": "in_window_pre_open",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "WAIT",
+      "final_status": "WAIT",
+      "final_reason": "R7_unanimous_wait:WAIT"
+    },
+    {
+      "ts": "2026-04-17T08:45:00+00:00",
+      "symbol": "EUR_USD",
+      "session": "in_window_pre_open",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "BUY",
+      "final_status": "BLOCK",
+      "final_reason": "incomplete_agreement"
+    },
+    {
+      "ts": "2026-04-21T12:15:00+00:00",
+      "symbol": "EUR_USD",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "WAIT",
+      "final_status": "WAIT",
+      "final_reason": "R7_unanimous_wait:WAIT"
+    },
+    {
+      "ts": "2026-04-21T12:30:00+00:00",
+      "symbol": "EUR_USD",
+      "session": "in_window_morning",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "WAIT",
+      "final_status": "WAIT",
+      "final_reason": "R7_unanimous_wait:WAIT"
+    },
+    {
+      "ts": "2026-04-24T07:45:00+00:00",
+      "symbol": "EUR_USD",
+      "session": "in_window_pre_open",
+      "n_grade": "A",
+      "n_decision": "WAIT",
+      "m_grade": "A",
+      "m_decision": "WAIT",
+      "c_grade": "A",
+      "c_decision": "WAIT",
+      "final_status": "WAIT",
+      "final_reason": "R7_unanimous_wait:WAIT"
+    }
+  ],
+  "smartnotebook_record_failures": 36,
+  "trades_per_day_distribution": {},
+  "days_2plus_trades": 0,
+  "trading_days_observed": 64
+}

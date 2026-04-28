@@ -1,0 +1,122 @@
+# HYDRA V4 — curated event schedule.
+# Trimmed from V3's 27 events down to the 10 that actually move EUR/USD or USD/JPY.
+# pip_per_sigma is the empirical pip move per 1-sigma surprise (calibrated on
+# 2018-2024 EUR/USD and USD/JPY 5-min bars; numbers are conservative).
+#
+# Schema per event:
+#   id:                stable identifier
+#   name:              human label
+#   currency:          USD | EUR | JPY
+#   affects:           list of pairs that react
+#   blackout_pre_min:  minutes before release where trading is BLACKED OUT
+#   blackout_post_min: minutes after release where trading is BLACKED OUT
+#   pip_per_sigma:     dict pair -> pips per 1-sigma surprise (positive)
+#   tier:              1 = top-tier macro, 2 = tier-2
+
+events:
+
+  - id: us_nfp
+    name: US Non-Farm Payrolls
+    currency: USD
+    affects: [EURUSD, USDJPY]
+    blackout_pre_min: 5
+    blackout_post_min: 30
+    pip_per_sigma:
+      EURUSD: 22.0
+      USDJPY: 28.0
+    tier: 1
+
+  - id: us_cpi
+    name: US CPI
+    currency: USD
+    affects: [EURUSD, USDJPY]
+    blackout_pre_min: 5
+    blackout_post_min: 30
+    pip_per_sigma:
+      EURUSD: 25.0
+      USDJPY: 30.0
+    tier: 1
+
+  - id: us_fomc_decision
+    name: FOMC Rate Decision
+    currency: USD
+    affects: [EURUSD, USDJPY]
+    blackout_pre_min: 10
+    blackout_post_min: 60
+    pip_per_sigma:
+      EURUSD: 35.0
+      USDJPY: 45.0
+    tier: 1
+
+  - id: us_fomc_minutes
+    name: FOMC Minutes
+    currency: USD
+    affects: [EURUSD, USDJPY]
+    blackout_pre_min: 5
+    blackout_post_min: 20
+    pip_per_sigma:
+      EURUSD: 12.0
+      USDJPY: 15.0
+    tier: 2
+
+  - id: us_powell_speech
+    name: Fed Chair Powell Speech
+    currency: USD
+    affects: [EURUSD, USDJPY]
+    blackout_pre_min: 2
+    blackout_post_min: 15
+    pip_per_sigma:
+      EURUSD: 10.0
+      USDJPY: 12.0
+    tier: 1
+
+  - id: us_gdp_advance
+    name: US GDP Advance
+    currency: USD
+    affects: [EURUSD, USDJPY]
+    blackout_pre_min: 5
+    blackout_post_min: 20
+    pip_per_sigma:
+      EURUSD: 14.0
+      USDJPY: 16.0
+    tier: 2
+
+  - id: eu_ecb_decision
+    name: ECB Rate Decision
+    currency: EUR
+    affects: [EURUSD]
+    blackout_pre_min: 10
+    blackout_post_min: 60
+    pip_per_sigma:
+      EURUSD: 30.0
+    tier: 1
+
+  - id: eu_lagarde_speech
+    name: ECB President Lagarde Speech
+    currency: EUR
+    affects: [EURUSD]
+    blackout_pre_min: 2
+    blackout_post_min: 15
+    pip_per_sigma:
+      EURUSD: 9.0
+    tier: 1
+
+  - id: jp_boj_decision
+    name: BoJ Rate Decision
+    currency: JPY
+    affects: [USDJPY]
+    blackout_pre_min: 10
+    blackout_post_min: 60
+    pip_per_sigma:
+      USDJPY: 40.0
+    tier: 1
+
+  - id: jp_ueda_speech
+    name: BoJ Governor Ueda Speech
+    currency: JPY
+    affects: [USDJPY]
+    blackout_pre_min: 2
+    blackout_post_min: 15
+    pip_per_sigma:
+      USDJPY: 11.0
+    tier: 1

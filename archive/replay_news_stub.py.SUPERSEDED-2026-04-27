@@ -1,0 +1,54 @@
+"""HYDRA V4 — ReplayNewsStub.
+
+Drop-in replacement for NewsMindV4 used during HISTORICAL replay only.
+
+Rationale:
+  * faireconomy.media (and any live news source) only serves CURRENT
+    news. Hitting it during a 2024 replay is BOTH lookahead-bias AND
+    rate-limit-prone (~2s per cycle = 55+ hours for 2y M15).
+  * This stub returns instantly with a neutral, honest output:
+      decision = WAIT
+      grade    = C  (stale = honest given no historical news data)
+      data_quality = "stale"
+      should_block = False
+  * Because grade=C, GateMind's strict 3/3 A/A+ unanimous mode will
+    REJECT trades — which is the honest "we don't know news" answer.
+  * If the user wants A-grade trades, they need a historical news cache
+    (separate phase). Until then, replay measures NEWS-INDEPENDENT
+    signal quality from MarketMind+ChartMind via REJECTED_TRADE +
+    SHADOW_OUTCOME paths.
+
+This stub is replay-only. The real NewsMindV4 stays untouched for live.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+from contracts.brain_output import BrainGrade, BrainOutput
+
+
+class ReplayNewsStub:
+    """Network-free NewsMind replacement for historical replay."""
+
+    BRAIN_NAME = "newsmind"
+
+    def evaluate(
+        self,
+        pair: str,
+        now_utc: datetime,
+        current_bar: Optional[Dict[str, Any]] = None,
+    ) -> BrainOutput:
+        return BrainOutput(
+            brain_name=self.BRAIN_NAME,
+            decision="WAIT",
+            grade=BrainGrade.C,
+            reason="replay mode: historical news data not available; brain neutralized",
+            evidence=["replay_stub_no_lookahead"],
+            data_quality="stale",
+            should_block=False,
+            risk_flags=["historical_news_unavailable"],
+            confidence=0.5,
+            timestamp_utc=now_utc,
+        )

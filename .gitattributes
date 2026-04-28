@@ -1,0 +1,12 @@
+# Cross-platform line ending normalisation.
+*.py    text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.sh    text eol=lf
+*.bat   text eol=crlf
+*.json  text eol=lf
+*.jsonl text eol=lf
+
+# Cached bars are small and deterministic — kept in normal Git, not LFS.
+# (Only ~12 MB per pair; well under the 100 MB Git limit per file.)

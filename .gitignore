@@ -1,0 +1,47 @@
+# Python build artifacts
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+
+# Environment / secrets — multi-layer defense
+.env
+.env.*
+*.env
+secrets/.env
+secrets/*.env
+secrets/*.key
+secrets/*.pem
+
+# CRITICAL — API key files / token stores — must never enter git.
+# Single accidental "git add ." here would leak production credentials.
+API_KEYS/
+API_KEYS/*
+**/api_keys/
+**/credentials/
+**/tokens/
+*token*.txt
+*credential*.txt
+
+# Logs and DBs (may incidentally contain redacted output)
+*.log
+*.sqlite
+*.db
+
+# Replay artefacts produced ON USER'S MACHINE — large, regenerable.
+# data_cache IS committed (small, deterministic input for the workflow).
+replay_results/
+
+# Per-cycle backtest output is large and regenerable; keep state.json,
+# summary.json, and DONE marker so resumable runs work in CI.
+replay_runs/*/cycles.jsonl
+replay_runs/*/enter_candidates.jsonl
+replay_runs/*/smartnotebook/
+replay_runs/*/CRASH
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

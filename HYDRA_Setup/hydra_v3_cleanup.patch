@@ -1,0 +1,689 @@
+From 33a29bd7b05d6dbe96552a7341241005c80a0209 Mon Sep 17 00:00:00 2001
+From: "Claude (HYDRA cleanup)" <claude@hydra.local>
+Date: Mon, 27 Apr 2026 04:05:04 +0000
+Subject: [PATCH] cleanup: rebrand to HYDRA V3, archive v1/v2 modules
+
+- Move ChartMind/, ChartMindV2/, MarketMind/, NewsMind/ (root), GateMind/,
+  SmartNoteBook/, LLMCore/, OandaAdapter/ to archive/
+- Move Engine.py, main.py, position_monitor.py to archive/
+- Move NewsMind/config/*.yaml to config/news/
+- Add archive/README.md documenting what each archived item was for
+- Update Dockerfile CMD to use engine/v3/main_v3.py (not legacy main.py)
+- Add main_v3.py shim at project root for portable launching
+
+V3 brain modules (chartmind/v3, marketmind/v3, newsmind/v2, gatemind/v3,
+smartnotebook/v3, engine/v3, llm/) all import cleanly after the move.
+
+This eliminates the case-sensitivity collision (ChartMind vs chartmind etc.)
+that was causing checkout warnings on Windows.
+---
+ Dockerfile                                    |  2 +-
+ {ChartMind => archive/ChartMind}/ChartMind.py |  0
+ {ChartMind => archive/ChartMind}/__init__.py  |  0
+ .../ChartMind}/algo_awareness.py              |  0
+ .../ChartMind}/calibrated_confidence.py       |  0
+ .../ChartMind}/calibration.py                 |  0
+ .../ChartMind}/chart_patterns.py              |  0
+ .../ChartMind}/chartmind_llm.py               |  0
+ {ChartMind => archive/ChartMind}/clarity.py   |  0
+ {ChartMind => archive/ChartMind}/execution.py |  0
+ {ChartMind => archive/ChartMind}/narrative.py |  0
+ {ChartMind => archive/ChartMind}/planner.py   |  0
+ .../ChartMind}/price_action.py                |  0
+ {ChartMind => archive/ChartMind}/priors.py    |  0
+ {ChartMind => archive/ChartMind}/traps.py     |  0
+ {ChartMind => archive/ChartMind}/verify.py    |  0
+ {ChartMind => archive/ChartMind}/wyckoff.py   |  0
+ .../ChartMindV2}/ChartMindV2.py               |  0
+ .../ChartMindV2}/__init__.py                  |  0
+ .../ChartMindV2}/candles.py                   |  0
+ .../ChartMindV2}/confluence.py                |  0
+ {ChartMindV2 => archive/ChartMindV2}/grade.py |  0
+ .../ChartMindV2}/models.py                    |  0
+ .../ChartMindV2}/momentum.py                  |  0
+ .../ChartMindV2}/planner.py                   |  0
+ .../ChartMindV2}/structure.py                 |  0
+ {ChartMindV2 => archive/ChartMindV2}/trend.py |  0
+ Engine.py => archive/Engine.py                |  0
+ {GateMind => archive/GateMind}/GateMind.py    |  0
+ {GateMind => archive/GateMind}/__init__.py    |  0
+ {GateMind => archive/GateMind}/decision.py    |  0
+ .../GateMind}/execution_router.py             |  0
+ .../GateMind}/gatemind_llm.py                 |  0
+ .../GateMind}/kill_switches.py                |  0
+ {GateMind => archive/GateMind}/ledger.py      |  0
+ {GateMind => archive/GateMind}/narrative.py   |  0
+ {GateMind => archive/GateMind}/portfolio.py   |  0
+ {GateMind => archive/GateMind}/risk.py        |  0
+ {LLMCore => archive/LLMCore}/__init__.py      |  0
+ {LLMCore => archive/LLMCore}/client.py        |  0
+ {LLMCore => archive/LLMCore}/cost.py          |  0
+ {LLMCore => archive/LLMCore}/parallel.py      |  0
+ {LLMCore => archive/LLMCore}/prompts.py       |  0
+ .../MarketMind}/MarketMind.py                 |  0
+ .../MarketMind}/__init__.py                   |  0
+ .../MarketMind}/composites.py                 |  0
+ .../MarketMind}/integration.py                |  0
+ .../MarketMind}/market_data.py                |  0
+ .../MarketMind}/marketmind_llm.py             |  0
+ {NewsMind => archive/NewsMind}/NewsMind.py    |  0
+ {NewsMind => archive/NewsMind}/__init__.py    |  0
+ .../NewsMind}/channel_router.py               |  0
+ .../NewsMind}/config_loader.py                |  0
+ {NewsMind => archive/NewsMind}/conviction.py  |  0
+ .../NewsMind}/event_calendar.py               |  0
+ .../NewsMind}/event_classifier.py             |  0
+ .../NewsMind}/event_windows.py                |  0
+ .../NewsMind}/headline_scanner.py             |  0
+ {NewsMind => archive/NewsMind}/integration.py |  0
+ .../NewsMind}/liquidity_session.py            |  0
+ .../NewsMind}/narrative_tracker.py            |  0
+ {NewsMind => archive/NewsMind}/news_data.py   |  0
+ .../NewsMind}/news_narrative.py               |  0
+ {NewsMind => archive/NewsMind}/news_regime.py |  0
+ .../NewsMind}/newsmind_llm.py                 |  0
+ .../NewsMind}/precedent_engine.py             |  0
+ .../NewsMind}/surprise_engine.py              |  0
+ .../NewsMind}/v2/NewsMindV2.py                |  0
+ {NewsMind => archive/NewsMind}/v2/__init__.py |  0
+ .../NewsMind}/v2/chase_detector.py            |  0
+ .../NewsMind}/v2/event_scheduler.py           |  0
+ .../NewsMind}/v2/freshness.py                 |  0
+ {NewsMind => archive/NewsMind}/v2/models.py   |  0
+ .../NewsMind}/v2/permission.py                |  0
+ {NewsMind => archive/NewsMind}/v2/sources.py  |  0
+ .../OandaAdapter}/__init__.py                 |  0
+ .../OandaAdapter}/account.py                  |  0
+ .../OandaAdapter}/broker.py                   |  0
+ .../OandaAdapter}/client.py                   |  0
+ .../OandaAdapter}/feed.py                     |  0
+ .../OandaAdapter}/instruments.py              |  0
+ archive/README.md                             | 29 +++++++++++++++++++
+ .../SmartNoteBook}/SmartNoteBook.py           |  0
+ .../SmartNoteBook}/__init__.py                |  0
+ .../SmartNoteBook}/bias_detector.py           |  0
+ .../SmartNoteBook}/briefing.py                |  0
+ .../SmartNoteBook}/journal.py                 |  0
+ .../SmartNoteBook}/lessons.py                 |  0
+ .../SmartNoteBook}/llm_grader.py              |  0
+ .../SmartNoteBook}/memory_injector.py         |  0
+ .../SmartNoteBook}/metrics.py                 |  0
+ .../SmartNoteBook}/patterns.py                |  0
+ .../SmartNoteBook}/post_mortem.py             |  0
+ .../SmartNoteBook}/pre_mortem.py              |  0
+ main.py => archive/main.py                    |  0
+ .../position_monitor.py                       |  0
+ {NewsMind/config => config/news}/events.yaml  |  0
+ .../config => config/news}/keywords.yaml      |  0
+ .../config => config/news}/narratives.yaml    |  0
+ {NewsMind/config => config/news}/sources.yaml |  0
+ main_v3.py                                    | 21 ++++++++++++++
+ 101 files changed, 51 insertions(+), 1 deletion(-)
+ rename {ChartMind => archive/ChartMind}/ChartMind.py (100%)
+ rename {ChartMind => archive/ChartMind}/__init__.py (100%)
+ rename {ChartMind => archive/ChartMind}/algo_awareness.py (100%)
+ rename {ChartMind => archive/ChartMind}/calibrated_confidence.py (100%)
+ rename {ChartMind => archive/ChartMind}/calibration.py (100%)
+ rename {ChartMind => archive/ChartMind}/chart_patterns.py (100%)
+ rename {ChartMind => archive/ChartMind}/chartmind_llm.py (100%)
+ rename {ChartMind => archive/ChartMind}/clarity.py (100%)
+ rename {ChartMind => archive/ChartMind}/execution.py (100%)
+ rename {ChartMind => archive/ChartMind}/narrative.py (100%)
+ rename {ChartMind => archive/ChartMind}/planner.py (100%)
+ rename {ChartMind => archive/ChartMind}/price_action.py (100%)
+ rename {ChartMind => archive/ChartMind}/priors.py (100%)
+ rename {ChartMind => archive/ChartMind}/traps.py (100%)
+ rename {ChartMind => archive/ChartMind}/verify.py (100%)
+ rename {ChartMind => archive/ChartMind}/wyckoff.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/ChartMindV2.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/__init__.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/candles.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/confluence.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/grade.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/models.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/momentum.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/planner.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/structure.py (100%)
+ rename {ChartMindV2 => archive/ChartMindV2}/trend.py (100%)
+ rename Engine.py => archive/Engine.py (100%)
+ rename {GateMind => archive/GateMind}/GateMind.py (100%)
+ rename {GateMind => archive/GateMind}/__init__.py (100%)
+ rename {GateMind => archive/GateMind}/decision.py (100%)
+ rename {GateMind => archive/GateMind}/execution_router.py (100%)
+ rename {GateMind => archive/GateMind}/gatemind_llm.py (100%)
+ rename {GateMind => archive/GateMind}/kill_switches.py (100%)
+ rename {GateMind => archive/GateMind}/ledger.py (100%)
+ rename {GateMind => archive/GateMind}/narrative.py (100%)
+ rename {GateMind => archive/GateMind}/portfolio.py (100%)
+ rename {GateMind => archive/GateMind}/risk.py (100%)
+ rename {LLMCore => archive/LLMCore}/__init__.py (100%)
+ rename {LLMCore => archive/LLMCore}/client.py (100%)
+ rename {LLMCore => archive/LLMCore}/cost.py (100%)
+ rename {LLMCore => archive/LLMCore}/parallel.py (100%)
+ rename {LLMCore => archive/LLMCore}/prompts.py (100%)
+ rename {MarketMind => archive/MarketMind}/MarketMind.py (100%)
+ rename {MarketMind => archive/MarketMind}/__init__.py (100%)
+ rename {MarketMind => archive/MarketMind}/composites.py (100%)
+ rename {MarketMind => archive/MarketMind}/integration.py (100%)
+ rename {MarketMind => archive/MarketMind}/market_data.py (100%)
+ rename {MarketMind => archive/MarketMind}/marketmind_llm.py (100%)
+ rename {NewsMind => archive/NewsMind}/NewsMind.py (100%)
+ rename {NewsMind => archive/NewsMind}/__init__.py (100%)
+ rename {NewsMind => archive/NewsMind}/channel_router.py (100%)
+ rename {NewsMind => archive/NewsMind}/config_loader.py (100%)
+ rename {NewsMind => archive/NewsMind}/conviction.py (100%)
+ rename {NewsMind => archive/NewsMind}/event_calendar.py (100%)
+ rename {NewsMind => archive/NewsMind}/event_classifier.py (100%)
+ rename {NewsMind => archive/NewsMind}/event_windows.py (100%)
+ rename {NewsMind => archive/NewsMind}/headline_scanner.py (100%)
+ rename {NewsMind => archive/NewsMind}/integration.py (100%)
+ rename {NewsMind => archive/NewsMind}/liquidity_session.py (100%)
+ rename {NewsMind => archive/NewsMind}/narrative_tracker.py (100%)
+ rename {NewsMind => archive/NewsMind}/news_data.py (100%)
+ rename {NewsMind => archive/NewsMind}/news_narrative.py (100%)
+ rename {NewsMind => archive/NewsMind}/news_regime.py (100%)
+ rename {NewsMind => archive/NewsMind}/newsmind_llm.py (100%)
+ rename {NewsMind => archive/NewsMind}/precedent_engine.py (100%)
+ rename {NewsMind => archive/NewsMind}/surprise_engine.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/NewsMindV2.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/__init__.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/chase_detector.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/event_scheduler.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/freshness.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/models.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/permission.py (100%)
+ rename {NewsMind => archive/NewsMind}/v2/sources.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/__init__.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/account.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/broker.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/client.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/feed.py (100%)
+ rename {OandaAdapter => archive/OandaAdapter}/instruments.py (100%)
+ create mode 100644 archive/README.md
+ rename {SmartNoteBook => archive/SmartNoteBook}/SmartNoteBook.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/__init__.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/bias_detector.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/briefing.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/journal.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/lessons.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/llm_grader.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/memory_injector.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/metrics.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/patterns.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/post_mortem.py (100%)
+ rename {SmartNoteBook => archive/SmartNoteBook}/pre_mortem.py (100%)
+ rename main.py => archive/main.py (100%)
+ rename position_monitor.py => archive/position_monitor.py (100%)
+ rename {NewsMind/config => config/news}/events.yaml (100%)
+ rename {NewsMind/config => config/news}/keywords.yaml (100%)
+ rename {NewsMind/config => config/news}/narratives.yaml (100%)
+ rename {NewsMind/config => config/news}/sources.yaml (100%)
+ create mode 100644 main_v3.py
+
+diff --git a/Dockerfile b/Dockerfile
+index 4ca0c08..466f15c 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -23,4 +23,4 @@ ENV PYTHONUNBUFFERED=1
+ ENV POLL_INTERVAL_SEC=60
+ 
+ # Run the live loop.
+-CMD ["python", "/app/main.py"]
++CMD ["python", "/app/engine/v3/main_v3.py"]
+diff --git a/ChartMind/ChartMind.py b/archive/ChartMind/ChartMind.py
+similarity index 100%
+rename from ChartMind/ChartMind.py
+rename to archive/ChartMind/ChartMind.py
+diff --git a/ChartMind/__init__.py b/archive/ChartMind/__init__.py
+similarity index 100%
+rename from ChartMind/__init__.py
+rename to archive/ChartMind/__init__.py
+diff --git a/ChartMind/algo_awareness.py b/archive/ChartMind/algo_awareness.py
+similarity index 100%
+rename from ChartMind/algo_awareness.py
+rename to archive/ChartMind/algo_awareness.py
+diff --git a/ChartMind/calibrated_confidence.py b/archive/ChartMind/calibrated_confidence.py
+similarity index 100%
+rename from ChartMind/calibrated_confidence.py
+rename to archive/ChartMind/calibrated_confidence.py
+diff --git a/ChartMind/calibration.py b/archive/ChartMind/calibration.py
+similarity index 100%
+rename from ChartMind/calibration.py
+rename to archive/ChartMind/calibration.py
+diff --git a/ChartMind/chart_patterns.py b/archive/ChartMind/chart_patterns.py
+similarity index 100%
+rename from ChartMind/chart_patterns.py
+rename to archive/ChartMind/chart_patterns.py
+diff --git a/ChartMind/chartmind_llm.py b/archive/ChartMind/chartmind_llm.py
+similarity index 100%
+rename from ChartMind/chartmind_llm.py
+rename to archive/ChartMind/chartmind_llm.py
+diff --git a/ChartMind/clarity.py b/archive/ChartMind/clarity.py
+similarity index 100%
+rename from ChartMind/clarity.py
+rename to archive/ChartMind/clarity.py
+diff --git a/ChartMind/execution.py b/archive/ChartMind/execution.py
+similarity index 100%
+rename from ChartMind/execution.py
+rename to archive/ChartMind/execution.py
+diff --git a/ChartMind/narrative.py b/archive/ChartMind/narrative.py
+similarity index 100%
+rename from ChartMind/narrative.py
+rename to archive/ChartMind/narrative.py
+diff --git a/ChartMind/planner.py b/archive/ChartMind/planner.py
+similarity index 100%
+rename from ChartMind/planner.py
+rename to archive/ChartMind/planner.py
+diff --git a/ChartMind/price_action.py b/archive/ChartMind/price_action.py
+similarity index 100%
+rename from ChartMind/price_action.py
+rename to archive/ChartMind/price_action.py
+diff --git a/ChartMind/priors.py b/archive/ChartMind/priors.py
+similarity index 100%
+rename from ChartMind/priors.py
+rename to archive/ChartMind/priors.py
+diff --git a/ChartMind/traps.py b/archive/ChartMind/traps.py
+similarity index 100%
+rename from ChartMind/traps.py
+rename to archive/ChartMind/traps.py
+diff --git a/ChartMind/verify.py b/archive/ChartMind/verify.py
+similarity index 100%
+rename from ChartMind/verify.py
+rename to archive/ChartMind/verify.py
+diff --git a/ChartMind/wyckoff.py b/archive/ChartMind/wyckoff.py
+similarity index 100%
+rename from ChartMind/wyckoff.py
+rename to archive/ChartMind/wyckoff.py
+diff --git a/ChartMindV2/ChartMindV2.py b/archive/ChartMindV2/ChartMindV2.py
+similarity index 100%
+rename from ChartMindV2/ChartMindV2.py
+rename to archive/ChartMindV2/ChartMindV2.py
+diff --git a/ChartMindV2/__init__.py b/archive/ChartMindV2/__init__.py
+similarity index 100%
+rename from ChartMindV2/__init__.py
+rename to archive/ChartMindV2/__init__.py
+diff --git a/ChartMindV2/candles.py b/archive/ChartMindV2/candles.py
+similarity index 100%
+rename from ChartMindV2/candles.py
+rename to archive/ChartMindV2/candles.py
+diff --git a/ChartMindV2/confluence.py b/archive/ChartMindV2/confluence.py
+similarity index 100%
+rename from ChartMindV2/confluence.py
+rename to archive/ChartMindV2/confluence.py
+diff --git a/ChartMindV2/grade.py b/archive/ChartMindV2/grade.py
+similarity index 100%
+rename from ChartMindV2/grade.py
+rename to archive/ChartMindV2/grade.py
+diff --git a/ChartMindV2/models.py b/archive/ChartMindV2/models.py
+similarity index 100%
+rename from ChartMindV2/models.py
+rename to archive/ChartMindV2/models.py
+diff --git a/ChartMindV2/momentum.py b/archive/ChartMindV2/momentum.py
+similarity index 100%
+rename from ChartMindV2/momentum.py
+rename to archive/ChartMindV2/momentum.py
+diff --git a/ChartMindV2/planner.py b/archive/ChartMindV2/planner.py
+similarity index 100%
+rename from ChartMindV2/planner.py
+rename to archive/ChartMindV2/planner.py
+diff --git a/ChartMindV2/structure.py b/archive/ChartMindV2/structure.py
+similarity index 100%
+rename from ChartMindV2/structure.py
+rename to archive/ChartMindV2/structure.py
+diff --git a/ChartMindV2/trend.py b/archive/ChartMindV2/trend.py
+similarity index 100%
+rename from ChartMindV2/trend.py
+rename to archive/ChartMindV2/trend.py
+diff --git a/Engine.py b/archive/Engine.py
+similarity index 100%
+rename from Engine.py
+rename to archive/Engine.py
+diff --git a/GateMind/GateMind.py b/archive/GateMind/GateMind.py
+similarity index 100%
+rename from GateMind/GateMind.py
+rename to archive/GateMind/GateMind.py
+diff --git a/GateMind/__init__.py b/archive/GateMind/__init__.py
+similarity index 100%
+rename from GateMind/__init__.py
+rename to archive/GateMind/__init__.py
+diff --git a/GateMind/decision.py b/archive/GateMind/decision.py
+similarity index 100%
+rename from GateMind/decision.py
+rename to archive/GateMind/decision.py
+diff --git a/GateMind/execution_router.py b/archive/GateMind/execution_router.py
+similarity index 100%
+rename from GateMind/execution_router.py
+rename to archive/GateMind/execution_router.py
+diff --git a/GateMind/gatemind_llm.py b/archive/GateMind/gatemind_llm.py
+similarity index 100%
+rename from GateMind/gatemind_llm.py
+rename to archive/GateMind/gatemind_llm.py
+diff --git a/GateMind/kill_switches.py b/archive/GateMind/kill_switches.py
+similarity index 100%
+rename from GateMind/kill_switches.py
+rename to archive/GateMind/kill_switches.py
+diff --git a/GateMind/ledger.py b/archive/GateMind/ledger.py
+similarity index 100%
+rename from GateMind/ledger.py
+rename to archive/GateMind/ledger.py
+diff --git a/GateMind/narrative.py b/archive/GateMind/narrative.py
+similarity index 100%
+rename from GateMind/narrative.py
+rename to archive/GateMind/narrative.py
+diff --git a/GateMind/portfolio.py b/archive/GateMind/portfolio.py
+similarity index 100%
+rename from GateMind/portfolio.py
+rename to archive/GateMind/portfolio.py
+diff --git a/GateMind/risk.py b/archive/GateMind/risk.py
+similarity index 100%
+rename from GateMind/risk.py
+rename to archive/GateMind/risk.py
+diff --git a/LLMCore/__init__.py b/archive/LLMCore/__init__.py
+similarity index 100%
+rename from LLMCore/__init__.py
+rename to archive/LLMCore/__init__.py
+diff --git a/LLMCore/client.py b/archive/LLMCore/client.py
+similarity index 100%
+rename from LLMCore/client.py
+rename to archive/LLMCore/client.py
+diff --git a/LLMCore/cost.py b/archive/LLMCore/cost.py
+similarity index 100%
+rename from LLMCore/cost.py
+rename to archive/LLMCore/cost.py
+diff --git a/LLMCore/parallel.py b/archive/LLMCore/parallel.py
+similarity index 100%
+rename from LLMCore/parallel.py
+rename to archive/LLMCore/parallel.py
+diff --git a/LLMCore/prompts.py b/archive/LLMCore/prompts.py
+similarity index 100%
+rename from LLMCore/prompts.py
+rename to archive/LLMCore/prompts.py
+diff --git a/MarketMind/MarketMind.py b/archive/MarketMind/MarketMind.py
+similarity index 100%
+rename from MarketMind/MarketMind.py
+rename to archive/MarketMind/MarketMind.py
+diff --git a/MarketMind/__init__.py b/archive/MarketMind/__init__.py
+similarity index 100%
+rename from MarketMind/__init__.py
+rename to archive/MarketMind/__init__.py
+diff --git a/MarketMind/composites.py b/archive/MarketMind/composites.py
+similarity index 100%
+rename from MarketMind/composites.py
+rename to archive/MarketMind/composites.py
+diff --git a/MarketMind/integration.py b/archive/MarketMind/integration.py
+similarity index 100%
+rename from MarketMind/integration.py
+rename to archive/MarketMind/integration.py
+diff --git a/MarketMind/market_data.py b/archive/MarketMind/market_data.py
+similarity index 100%
+rename from MarketMind/market_data.py
+rename to archive/MarketMind/market_data.py
+diff --git a/MarketMind/marketmind_llm.py b/archive/MarketMind/marketmind_llm.py
+similarity index 100%
+rename from MarketMind/marketmind_llm.py
+rename to archive/MarketMind/marketmind_llm.py
+diff --git a/NewsMind/NewsMind.py b/archive/NewsMind/NewsMind.py
+similarity index 100%
+rename from NewsMind/NewsMind.py
+rename to archive/NewsMind/NewsMind.py
+diff --git a/NewsMind/__init__.py b/archive/NewsMind/__init__.py
+similarity index 100%
+rename from NewsMind/__init__.py
+rename to archive/NewsMind/__init__.py
+diff --git a/NewsMind/channel_router.py b/archive/NewsMind/channel_router.py
+similarity index 100%
+rename from NewsMind/channel_router.py
+rename to archive/NewsMind/channel_router.py
+diff --git a/NewsMind/config_loader.py b/archive/NewsMind/config_loader.py
+similarity index 100%
+rename from NewsMind/config_loader.py
+rename to archive/NewsMind/config_loader.py
+diff --git a/NewsMind/conviction.py b/archive/NewsMind/conviction.py
+similarity index 100%
+rename from NewsMind/conviction.py
+rename to archive/NewsMind/conviction.py
+diff --git a/NewsMind/event_calendar.py b/archive/NewsMind/event_calendar.py
+similarity index 100%
+rename from NewsMind/event_calendar.py
+rename to archive/NewsMind/event_calendar.py
+diff --git a/NewsMind/event_classifier.py b/archive/NewsMind/event_classifier.py
+similarity index 100%
+rename from NewsMind/event_classifier.py
+rename to archive/NewsMind/event_classifier.py
+diff --git a/NewsMind/event_windows.py b/archive/NewsMind/event_windows.py
+similarity index 100%
+rename from NewsMind/event_windows.py
+rename to archive/NewsMind/event_windows.py
+diff --git a/NewsMind/headline_scanner.py b/archive/NewsMind/headline_scanner.py
+similarity index 100%
+rename from NewsMind/headline_scanner.py
+rename to archive/NewsMind/headline_scanner.py
+diff --git a/NewsMind/integration.py b/archive/NewsMind/integration.py
+similarity index 100%
+rename from NewsMind/integration.py
+rename to archive/NewsMind/integration.py
+diff --git a/NewsMind/liquidity_session.py b/archive/NewsMind/liquidity_session.py
+similarity index 100%
+rename from NewsMind/liquidity_session.py
+rename to archive/NewsMind/liquidity_session.py
+diff --git a/NewsMind/narrative_tracker.py b/archive/NewsMind/narrative_tracker.py
+similarity index 100%
+rename from NewsMind/narrative_tracker.py
+rename to archive/NewsMind/narrative_tracker.py
+diff --git a/NewsMind/news_data.py b/archive/NewsMind/news_data.py
+similarity index 100%
+rename from NewsMind/news_data.py
+rename to archive/NewsMind/news_data.py
+diff --git a/NewsMind/news_narrative.py b/archive/NewsMind/news_narrative.py
+similarity index 100%
+rename from NewsMind/news_narrative.py
+rename to archive/NewsMind/news_narrative.py
+diff --git a/NewsMind/news_regime.py b/archive/NewsMind/news_regime.py
+similarity index 100%
+rename from NewsMind/news_regime.py
+rename to archive/NewsMind/news_regime.py
+diff --git a/NewsMind/newsmind_llm.py b/archive/NewsMind/newsmind_llm.py
+similarity index 100%
+rename from NewsMind/newsmind_llm.py
+rename to archive/NewsMind/newsmind_llm.py
+diff --git a/NewsMind/precedent_engine.py b/archive/NewsMind/precedent_engine.py
+similarity index 100%
+rename from NewsMind/precedent_engine.py
+rename to archive/NewsMind/precedent_engine.py
+diff --git a/NewsMind/surprise_engine.py b/archive/NewsMind/surprise_engine.py
+similarity index 100%
+rename from NewsMind/surprise_engine.py
+rename to archive/NewsMind/surprise_engine.py
+diff --git a/NewsMind/v2/NewsMindV2.py b/archive/NewsMind/v2/NewsMindV2.py
+similarity index 100%
+rename from NewsMind/v2/NewsMindV2.py
+rename to archive/NewsMind/v2/NewsMindV2.py
+diff --git a/NewsMind/v2/__init__.py b/archive/NewsMind/v2/__init__.py
+similarity index 100%
+rename from NewsMind/v2/__init__.py
+rename to archive/NewsMind/v2/__init__.py
+diff --git a/NewsMind/v2/chase_detector.py b/archive/NewsMind/v2/chase_detector.py
+similarity index 100%
+rename from NewsMind/v2/chase_detector.py
+rename to archive/NewsMind/v2/chase_detector.py
+diff --git a/NewsMind/v2/event_scheduler.py b/archive/NewsMind/v2/event_scheduler.py
+similarity index 100%
+rename from NewsMind/v2/event_scheduler.py
+rename to archive/NewsMind/v2/event_scheduler.py
+diff --git a/NewsMind/v2/freshness.py b/archive/NewsMind/v2/freshness.py
+similarity index 100%
+rename from NewsMind/v2/freshness.py
+rename to archive/NewsMind/v2/freshness.py
+diff --git a/NewsMind/v2/models.py b/archive/NewsMind/v2/models.py
+similarity index 100%
+rename from NewsMind/v2/models.py
+rename to archive/NewsMind/v2/models.py
+diff --git a/NewsMind/v2/permission.py b/archive/NewsMind/v2/permission.py
+similarity index 100%
+rename from NewsMind/v2/permission.py
+rename to archive/NewsMind/v2/permission.py
+diff --git a/NewsMind/v2/sources.py b/archive/NewsMind/v2/sources.py
+similarity index 100%
+rename from NewsMind/v2/sources.py
+rename to archive/NewsMind/v2/sources.py
+diff --git a/OandaAdapter/__init__.py b/archive/OandaAdapter/__init__.py
+similarity index 100%
+rename from OandaAdapter/__init__.py
+rename to archive/OandaAdapter/__init__.py
+diff --git a/OandaAdapter/account.py b/archive/OandaAdapter/account.py
+similarity index 100%
+rename from OandaAdapter/account.py
+rename to archive/OandaAdapter/account.py
+diff --git a/OandaAdapter/broker.py b/archive/OandaAdapter/broker.py
+similarity index 100%
+rename from OandaAdapter/broker.py
+rename to archive/OandaAdapter/broker.py
+diff --git a/OandaAdapter/client.py b/archive/OandaAdapter/client.py
+similarity index 100%
+rename from OandaAdapter/client.py
+rename to archive/OandaAdapter/client.py
+diff --git a/OandaAdapter/feed.py b/archive/OandaAdapter/feed.py
+similarity index 100%
+rename from OandaAdapter/feed.py
+rename to archive/OandaAdapter/feed.py
+diff --git a/OandaAdapter/instruments.py b/archive/OandaAdapter/instruments.py
+similarity index 100%
+rename from OandaAdapter/instruments.py
+rename to archive/OandaAdapter/instruments.py
+diff --git a/archive/README.md b/archive/README.md
+new file mode 100644
+index 0000000..9528de9
+--- /dev/null
++++ b/archive/README.md
+@@ -0,0 +1,29 @@
++# archive/ — أرشيف الكود القديم (HYDRA V1/V2)
++
++هذا المجلد يحتوي على الإصدارات القديمة قبل V3. **محفوظة كمرجع تاريخي فقط** — لا يستوردها أي كود نشط.
++
++## المحتوى
++
++| المجلد/الملف | كان يستخدم في | بديله في V3 |
++|---|---|---|
++| `ChartMind/` | الإصدار 1 (التحليل الفني) | `chartmind/v3/` |
++| `ChartMindV2/` | الإصدار 2 | `chartmind/v3/` |
++| `MarketMind/` | الإصدار 1 (الماكرو) | `marketmind/v3/` |
++| `NewsMind/` | الإصدار 1 (الأخبار) — YAML configs انتقلت إلى `config/news/` | `newsmind/v2/` |
++| `GateMind/` | الإصدار 1 (البوابة) | `gatemind/v3/` |
++| `SmartNoteBook/` | الإصدار 1 (الذاكرة) | `smartnotebook/v3/` |
++| `LLMCore/` | LLM helpers قديمة | `llm/` |
++| `OandaAdapter/` | محوّل OANDA قديم | يحتاج إعادة كتابة لـ V3 |
++| `Engine.py` | المنسّق القديم | `engine/v3/EngineV3.py` |
++| `main.py` | حلقة polling قديمة | `main_v3.py` (في الجذر) و `engine/v3/main_v3.py` |
++| `position_monitor.py` | غير موصول بـ V3 | TBD |
++
++## ملاحظات مهمة
++
++- **بعض الأفكار في الكود القديم لم تنتقل بعد إلى V3:**
++  - `SmartNoteBook/journal.py` — journal مفصّل
++  - `SmartNoteBook/post_mortem.py` — تشريح بعد الإغلاق
++  - `ChartMind/wyckoff.py` — تحليل Wyckoff
++  - `NewsMind/narrative_tracker.py` — تتبّع روايات السوق
++  - `OandaAdapter/` — يحتاج migration إلى V3 broker interface
++- إذا احتجت أيّ من هذه لاحقاً، استخدم `git log --follow archive/<path>` لرؤية تاريخ التعديل.
+diff --git a/SmartNoteBook/SmartNoteBook.py b/archive/SmartNoteBook/SmartNoteBook.py
+similarity index 100%
+rename from SmartNoteBook/SmartNoteBook.py
+rename to archive/SmartNoteBook/SmartNoteBook.py
+diff --git a/SmartNoteBook/__init__.py b/archive/SmartNoteBook/__init__.py
+similarity index 100%
+rename from SmartNoteBook/__init__.py
+rename to archive/SmartNoteBook/__init__.py
+diff --git a/SmartNoteBook/bias_detector.py b/archive/SmartNoteBook/bias_detector.py
+similarity index 100%
+rename from SmartNoteBook/bias_detector.py
+rename to archive/SmartNoteBook/bias_detector.py
+diff --git a/SmartNoteBook/briefing.py b/archive/SmartNoteBook/briefing.py
+similarity index 100%
+rename from SmartNoteBook/briefing.py
+rename to archive/SmartNoteBook/briefing.py
+diff --git a/SmartNoteBook/journal.py b/archive/SmartNoteBook/journal.py
+similarity index 100%
+rename from SmartNoteBook/journal.py
+rename to archive/SmartNoteBook/journal.py
+diff --git a/SmartNoteBook/lessons.py b/archive/SmartNoteBook/lessons.py
+similarity index 100%
+rename from SmartNoteBook/lessons.py
+rename to archive/SmartNoteBook/lessons.py
+diff --git a/SmartNoteBook/llm_grader.py b/archive/SmartNoteBook/llm_grader.py
+similarity index 100%
+rename from SmartNoteBook/llm_grader.py
+rename to archive/SmartNoteBook/llm_grader.py
+diff --git a/SmartNoteBook/memory_injector.py b/archive/SmartNoteBook/memory_injector.py
+similarity index 100%
+rename from SmartNoteBook/memory_injector.py
+rename to archive/SmartNoteBook/memory_injector.py
+diff --git a/SmartNoteBook/metrics.py b/archive/SmartNoteBook/metrics.py
+similarity index 100%
+rename from SmartNoteBook/metrics.py
+rename to archive/SmartNoteBook/metrics.py
+diff --git a/SmartNoteBook/patterns.py b/archive/SmartNoteBook/patterns.py
+similarity index 100%
+rename from SmartNoteBook/patterns.py
+rename to archive/SmartNoteBook/patterns.py
+diff --git a/SmartNoteBook/post_mortem.py b/archive/SmartNoteBook/post_mortem.py
+similarity index 100%
+rename from SmartNoteBook/post_mortem.py
+rename to archive/SmartNoteBook/post_mortem.py
+diff --git a/SmartNoteBook/pre_mortem.py b/archive/SmartNoteBook/pre_mortem.py
+similarity index 100%
+rename from SmartNoteBook/pre_mortem.py
+rename to archive/SmartNoteBook/pre_mortem.py
+diff --git a/main.py b/archive/main.py
+similarity index 100%
+rename from main.py
+rename to archive/main.py
+diff --git a/position_monitor.py b/archive/position_monitor.py
+similarity index 100%
+rename from position_monitor.py
+rename to archive/position_monitor.py
+diff --git a/NewsMind/config/events.yaml b/config/news/events.yaml
+similarity index 100%
+rename from NewsMind/config/events.yaml
+rename to config/news/events.yaml
+diff --git a/NewsMind/config/keywords.yaml b/config/news/keywords.yaml
+similarity index 100%
+rename from NewsMind/config/keywords.yaml
+rename to config/news/keywords.yaml
+diff --git a/NewsMind/config/narratives.yaml b/config/news/narratives.yaml
+similarity index 100%
+rename from NewsMind/config/narratives.yaml
+rename to config/news/narratives.yaml
+diff --git a/NewsMind/config/sources.yaml b/config/news/sources.yaml
+similarity index 100%
+rename from NewsMind/config/sources.yaml
+rename to config/news/sources.yaml
+diff --git a/main_v3.py b/main_v3.py
+new file mode 100644
+index 0000000..61c982a
+--- /dev/null
++++ b/main_v3.py
+@@ -0,0 +1,21 @@
++# -*- coding: utf-8 -*-
++"""HYDRA V3 — root entry point (shim).
++
++Forwards to engine.v3.main_v3 with a portable PYTHONPATH so this works
++both inside Docker (/app) and on a developer laptop.
++"""
++from __future__ import annotations
++import os
++import sys
++from pathlib import Path
++
++# Add project root to PYTHONPATH so all 5 brain packages are importable.
++ROOT = Path(__file__).resolve().parent
++sys.path.insert(0, str(ROOT))
++
++# Honour Docker's /app convention if it exists (for Hostinger compatibility).
++if os.path.isdir("/app") and "/app" not in sys.path:
++    sys.path.insert(0, "/app")
++
++# Now hand off to the actual loop.
++from engine.v3 import main_v3  # noqa: F401  (executes the loop on import)
+-- 
+2.34.1
+

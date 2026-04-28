@@ -1,0 +1,161 @@
+HYDRA V4 - PHASE 1 GIT AUDIT 
+Generated: Mon 04/27/2026 21:28:34.99 
+Working dir: C:\Users\Mansur\Desktop\HYDRA V4 
+ 
+=== [1] git --version === 
+git version 2.54.0.windows.1
+ 
+=== [2] Repository root === 
+C:/Users/Mansur/Desktop/HYDRA V4
+ 
+=== [3] Current branch === 
+main
+ 
+=== [4] All branches === 
+* main
+ 
+=== [5] Latest commit (HEAD) === 
+3c817ed42ec636e70c73a6b52b135afff3ec1929
+  Author: Mansur Alghananim ^<alghananim@icloud.com^>
+  Date:   Mon Apr 27 12:51:05 2026 -0400
+  Subject: freeze: NewsMind V4.0 - 49 tests pass, Red Team approved
+ 
+=== [6] Last 20 commits (oneline) === 
+3c817ed freeze: NewsMind V4.0 - 49 tests pass, Red Team approved
+ 
+=== [7] Tags === 
+newsmind-v4.0-frozen
+ 
+=== [8] git status (porcelain) === 
+ M .gitignore
+ M contracts/brain_output.py
+?? "All files/"
+?? CHARTMIND_V4_FREEZE_REPORT.md
+?? GATEMIND_V4_FREEZE_REPORT.md
+?? MARKETMIND_V4_FREEZE_REPORT.md
+?? SMARTNOTEBOOK_V4_FREEZE_REPORT.md
+?? anthropic_bridge/
+?? chartmind/
+?? gatemind/
+?? live_data/
+?? marketmind/
+?? orchestrator/
+?? replay/
+?? run_live_replay.py
+?? secrets/
+?? setup_and_run.py
+?? smartnotebook/
+ 
+=== [9] git status (full) === 
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .gitignore
+	modified:   contracts/brain_output.py
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	All files/
+	CHARTMIND_V4_FREEZE_REPORT.md
+	GATEMIND_V4_FREEZE_REPORT.md
+	MARKETMIND_V4_FREEZE_REPORT.md
+	SMARTNOTEBOOK_V4_FREEZE_REPORT.md
+	anthropic_bridge/
+	chartmind/
+	gatemind/
+	live_data/
+	marketmind/
+	orchestrator/
+	replay/
+	run_live_replay.py
+	secrets/
+	setup_and_run.py
+	smartnotebook/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+ 
+=== [10] Files tracked by git (count) === 
+Tracked files: 28 
+ 
+=== [11] Files containing potentially-secret patterns IN GIT === 
+(searching tracked files only - won't see secrets/.env which is gitignored) 
+(end of secret scan) 
+ 
+=== [12] .gitignore content === 
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+.env
+secrets/.env
+secrets/*.env
+*.log
+*.sqlite
+*.db
+# Replay artefacts produced ON USER'S MACHINE — large, regenerable
+data_cache/
+replay_results/
+
+ 
+=== [13] secrets folder status === 
+secrets/ folder EXISTS on disk 
+.env
+.env.sample
+README.txt
+ 
+Is secrets/.env tracked by git? 
+.gitignore:8:secrets/*.env	secrets/.env
+ 
+=== [14] data_cache folder status === 
+data_cache/ folder EXISTS on disk 
+Is it tracked? 
+error: unknown switch `5'
+usage: git ls-files [<options>] [<file>...]
+
+    -z                    separate paths with the NUL character
+    -t                    identify the file status with tags
+    -v                    use lowercase letters for 'assume unchanged' files
+    -f                    use lowercase letters for 'fsmonitor clean' files
+    -c, --[no-]cached     show cached files in the output (default)
+    -d, --[no-]deleted    show deleted files in the output
+    -m, --[no-]modified   show modified files in the output
+    -o, --[no-]others     show other files in the output
+    -i, --[no-]ignored    show ignored files in the output
+    -s, --[no-]stage      show staged contents' object name in the output
+    -k, --[no-]killed     show files on the filesystem that need to be removed
+    --[no-]directory      show 'other' directories' names only
+    --[no-]eol            show line endings of files
+    --[no-]empty-directory
+                          don't show empty directories
+    -u, --[no-]unmerged   show unmerged files in the output
+    --[no-]resolve-undo   show resolve-undo information
+    -x, --exclude <pattern>
+                          skip files matching pattern
+    -X, --exclude-from <file>
+                          read exclude patterns from <file>
+    --[no-]exclude-per-directory <file>
+                          read additional per-directory exclude patterns in <file>
+    --exclude-standard    add the standard git exclusions
+    --full-name           make the output relative to the project top directory
+    --[no-]recurse-submodules
+                          recurse through submodules
+    --[no-]error-unmatch  if any <file> is not in the index, treat this as an error
+    --[no-]with-tree <tree-ish>
+                          pretend that paths removed since <tree-ish> are still present
+    --[no-]abbrev[=<n>]   use <n> digits to display object names
+    --[no-]debug          show debugging data
+    --[no-]deduplicate    suppress duplicate entries
+    --[no-]sparse         show sparse directories in the presence of a sparse index
+    --format <format>     format to use for the output
+
+ 
+=== [15] Working tree clean check === 
+warning: in the working copy of 'contracts/brain_output.py', LF will be replaced by CRLF the next time Git touches it
+ .gitignore                |  6 ++++++
+ contracts/brain_output.py | 20 ++++++++++++++++----
+ 2 files changed, 22 insertions(+), 4 deletions(-)
+--- staged --- 
+ 
+=== END OF AUDIT === 
