@@ -1,245 +1,31 @@
 {
   "input_file": "replay_runs/v47_2y/cycles.jsonl",
-  "total_records": 22386,
-  "final_status_counts": {
-    "BLOCK": 22361,
-    "WAIT": 13,
-    "ENTER_CANDIDATE": 12
-  },
-  "final_reason_counts": [
-    [
-      "outside_new_york_trading_window",
-      16786
-    ],
-    [
-      "grade_below_threshold",
-      5574
-    ],
-    [
-      "R7_unanimous_wait:WAIT",
-      13
-    ],
-    [
-      "all_brains_unanimous_enter",
-      12
-    ],
-    [
-      "kill_flag_active",
-      1
-    ]
-  ],
-  "session_status_counts": {
-    "outside_window": 16786,
-    "in_window_morning": 3744,
-    "in_window_pre_open": 1856
-  },
-  "pair_counts": {
-    "EUR_USD": 11193,
-    "USD_JPY": 11193
-  },
+  "total_records": 0,
+  "final_status_counts": {},
+  "final_reason_counts": [],
+  "session_status_counts": {},
+  "pair_counts": {},
   "in_window_breakdown": {
-    "total": 5600,
-    "BLOCK": 5575,
-    "WAIT": 13,
-    "ENTER_CANDIDATE": 12
+    "total": 0,
+    "BLOCK": 0,
+    "WAIT": 0,
+    "ENTER_CANDIDATE": 0
   },
   "grade_distribution_by_mind": {
-    "NewsMind": {
-      "A": 22229,
-      "BLOCK": 157
-    },
-    "MarketMind": {
-      "B": 6558,
-      "C": 3813,
-      "A": 535,
-      "BLOCK": 11480
-    },
-    "ChartMind": {
-      "B": 6716,
-      "C": 4125,
-      "A": 60,
-      "BLOCK": 11480,
-      "A+": 5
-    }
+    "NewsMind": {},
+    "MarketMind": {},
+    "ChartMind": {}
   },
   "decision_distribution_by_mind": {
-    "NewsMind": {
-      "WAIT": 22229,
-      "BLOCK": 157
-    },
-    "MarketMind": {
-      "WAIT": 10906,
-      "BLOCK": 11480
-    },
-    "ChartMind": {
-      "WAIT": 10873,
-      "SELL": 9,
-      "BLOCK": 11480,
-      "BUY": 24
-    }
+    "NewsMind": {},
+    "MarketMind": {},
+    "ChartMind": {}
   },
   "data_quality_distribution_by_mind": {
-    "NewsMind": {
-      "good": 22386
-    },
-    "MarketMind": {
-      "good": 17962,
-      "stale": 4424
-    },
-    "ChartMind": {
-      "good": 22386
-    }
+    "NewsMind": {},
+    "MarketMind": {},
+    "ChartMind": {}
   },
-  "top_decision_triples": [
-    [
-      [
-        "WAIT",
-        "BLOCK",
-        "BLOCK"
-      ],
-      11323
-    ],
-    [
-      [
-        "WAIT",
-        "WAIT",
-        "WAIT"
-      ],
-      10873
-    ],
-    [
-      [
-        "BLOCK",
-        "BLOCK",
-        "BLOCK"
-      ],
-      157
-    ],
-    [
-      [
-        "WAIT",
-        "WAIT",
-        "BUY"
-      ],
-      24
-    ],
-    [
-      [
-        "WAIT",
-        "WAIT",
-        "SELL"
-      ],
-      9
-    ]
-  ],
-  "top_triple_reason_combos": [
-    {
-      "triple": [
-        "WAIT",
-        "BLOCK",
-        "BLOCK"
-      ],
-      "final_reason": "outside_new_york_trading_window",
-      "count": 9995
-    },
-    {
-      "triple": [
-        "WAIT",
-        "WAIT",
-        "WAIT"
-      ],
-      "final_reason": "outside_new_york_trading_window",
-      "count": 6700
-    },
-    {
-      "triple": [
-        "WAIT",
-        "WAIT",
-        "WAIT"
-      ],
-      "final_reason": "grade_below_threshold",
-      "count": 4160
-    },
-    {
-      "triple": [
-        "WAIT",
-        "BLOCK",
-        "BLOCK"
-      ],
-      "final_reason": "grade_below_threshold",
-      "count": 1328
-    },
-    {
-      "triple": [
-        "BLOCK",
-        "BLOCK",
-        "BLOCK"
-      ],
-      "final_reason": "grade_below_threshold",
-      "count": 86
-    },
-    {
-      "triple": [
-        "BLOCK",
-        "BLOCK",
-        "BLOCK"
-      ],
-      "final_reason": "outside_new_york_trading_window",
-      "count": 71
-    },
-    {
-      "triple": [
-        "WAIT",
-        "WAIT",
-        "BUY"
-      ],
-      "final_reason": "outside_new_york_trading_window",
-      "count": 13
-    },
-    {
-      "triple": [
-        "WAIT",
-        "WAIT",
-        "WAIT"
-      ],
-      "final_reason": "R7_unanimous_wait:WAIT",
-      "count": 13
-    },
-    {
-      "triple": [
-        "WAIT",
-        "WAIT",
-        "BUY"
-      ],
-      "final_reason": "all_brains_unanimous_enter",
-      "count": 10
-    },
-    {
-      "triple": [
-        "WAIT",
-        "WAIT",
-        "SELL"
-      ],
-      "final_reason": "outside_new_york_trading_window",
-      "count": 7
-    },
-    {
-      "triple": [
-        "WAIT",
-        "WAIT",
-        "SELL"
-      ],
-      "final_reason": "all_brains_unanimous_enter",
-      "count": 2
-    },
-    {
-      "triple": [
-        "WAIT",
-        "WAIT",
-        "BUY"
-      ],
-      "final_reason": "kill_flag_active",
-      "count": 1
-    }
-  ]
+  "top_decision_triples": [],
+  "top_triple_reason_combos": []
 }

@@ -7,87 +7,42 @@
   },
   "summary_by_mode": {
     "shadow_chart": {
-      "trades": 13,
-      "wins": 1,
-      "losses": 5,
-      "timeouts": 7,
-      "win_rate_excl_timeout": 16.666666666666664,
-      "net_pips_after_cost": -58.7,
-      "avg_pips_per_trade": -4.52,
-      "max_drawdown_pips": -97.2,
-      "per_pair": {
-        "EUR_USD": {
-          "trades": 5,
-          "net_pips": 16.8,
-          "wins": 1,
-          "losses": 1,
-          "timeouts": 3
-        },
-        "USD_JPY": {
-          "trades": 8,
-          "net_pips": -75.5,
-          "wins": 0,
-          "losses": 4,
-          "timeouts": 4
-        }
-      }
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "timeouts": 0,
+      "win_rate_excl_timeout": null,
+      "net_pips_after_cost": 0,
+      "avg_pips_per_trade": null,
+      "max_drawdown_pips": 0.0,
+      "per_pair": {}
     },
     "shadow_grade_B": {
-      "trades": 13,
-      "wins": 1,
-      "losses": 5,
-      "timeouts": 7,
-      "win_rate_excl_timeout": 16.666666666666664,
-      "net_pips_after_cost": -58.7,
-      "avg_pips_per_trade": -4.52,
-      "max_drawdown_pips": -97.2,
-      "per_pair": {
-        "EUR_USD": {
-          "trades": 5,
-          "net_pips": 16.8,
-          "wins": 1,
-          "losses": 1,
-          "timeouts": 3
-        },
-        "USD_JPY": {
-          "trades": 8,
-          "net_pips": -75.5,
-          "wins": 0,
-          "losses": 4,
-          "timeouts": 4
-        }
-      }
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "timeouts": 0,
+      "win_rate_excl_timeout": null,
+      "net_pips_after_cost": 0,
+      "avg_pips_per_trade": null,
+      "max_drawdown_pips": 0.0,
+      "per_pair": {}
     },
     "shadow_2_of_3": {
-      "trades": 13,
-      "wins": 1,
-      "losses": 5,
-      "timeouts": 7,
-      "win_rate_excl_timeout": 16.666666666666664,
-      "net_pips_after_cost": -58.7,
-      "avg_pips_per_trade": -4.52,
-      "max_drawdown_pips": -97.2,
-      "per_pair": {
-        "EUR_USD": {
-          "trades": 5,
-          "net_pips": 16.8,
-          "wins": 1,
-          "losses": 1,
-          "timeouts": 3
-        },
-        "USD_JPY": {
-          "trades": 8,
-          "net_pips": -75.5,
-          "wins": 0,
-          "losses": 4,
-          "timeouts": 4
-        }
-      }
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "timeouts": 0,
+      "win_rate_excl_timeout": null,
+      "net_pips_after_cost": 0,
+      "avg_pips_per_trade": null,
+      "max_drawdown_pips": 0.0,
+      "per_pair": {}
     }
   },
   "trade_counts_total": {
-    "shadow_chart": 13,
-    "shadow_grade_B": 13,
-    "shadow_2_of_3": 13
+    "shadow_chart": 0,
+    "shadow_grade_B": 0,
+    "shadow_2_of_3": 0
   }
 }
