@@ -56,12 +56,16 @@ class HydraOrchestratorV11:
 
     def __init__(self, *, smartnotebook, newsmind=None):
         # Reuse V5 orchestrator construction.
-        self._inner = HydraOrchestratorV4(
-            smartnotebook=smartnotebook, newsmind=newsmind
-        )
+        if newsmind is not None:
+            self._inner = HydraOrchestratorV4(
+                smartnotebook=smartnotebook, newsmind=newsmind
+            )
+        else:
+            self._inner = HydraOrchestratorV4(smartnotebook=smartnotebook)
         # Save originals for revert.
         self._original_grade_a_min = ct.GRADE_A_MIN_EVIDENCE
-        self._chartmind = self._inner._chartmind  # type: ignore[attr-defined]
+        # V5 attribute is `chartmind` (no underscore).
+        self._chartmind = getattr(self._inner, "chartmind", None)
 
     # --- public surface mirrors V4 ---------------------------------
 
