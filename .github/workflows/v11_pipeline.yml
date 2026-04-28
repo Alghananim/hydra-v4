@@ -1,0 +1,132 @@
+name: HYDRA V11 — Multi-Pair Backtest
+
+# Manual trigger only. Runs the V11 backtest over all 6 pairs (or a
+# subset) on M5 (with M15 fallback). Results commit back via single
+# sequential push.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Comma-separated pairs (or empty = all 6)"
+        default: ""
+        type: string
+      time_budget_s:
+        description: "Per-chunk budget in seconds"
+        default: "300"
+        type: string
+      max_chunks:
+        description: "Max chunks before forced stop"
+        default: "60"
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  v11_backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest pyyaml
+
+      - name: Show free disk
+        run: df -h
+
+      - name: List available data caches
+        run: |
+          for pair in EUR_USD USD_JPY GBP_USD USD_CAD AUD_USD EUR_JPY ; do
+            for tf in M5 M15 ; do
+              path="data_cache/$pair/$tf/merged.jsonl"
+              if [ -f "$path" ] ; then
+                lines=$(wc -l < "$path")
+                echo "  $path : $lines bars"
+              fi
+            done
+          done
+
+      - name: Run V11 backtest until DONE
+        run: |
+          set +e
+          OUT=replay_runs/v11_baseline
+          mkdir -p "$OUT"
+          PAIRS_ARG=""
+          if [ -n "${{ inputs.pairs }}" ] ; then
+            PAIRS_ARG="--pairs ${{ inputs.pairs }}"
+          fi
+          CHUNK=0
+          MAX_CHUNKS=${{ inputs.max_chunks || 60 }}
+          while [ ! -f "$OUT/DONE" ] ; do
+            CHUNK=$((CHUNK + 1))
+            if [ "$CHUNK" -gt "$MAX_CHUNKS" ] ; then
+              echo "Hit MAX_CHUNKS=$MAX_CHUNKS without DONE; stopping."
+              break
+            fi
+            echo "=== V11 chunk $CHUNK ==="
+            PYTHONPATH=. python -m v11.run_v11_backtest \
+              --output-dir "$OUT" \
+              --time-budget-s ${{ inputs.time_budget_s || 300 }} \
+              --checkpoint-every 2000 \
+              $PAIRS_ARG || { echo "chunk failed; retrying"; sleep 5; continue; }
+          done
+          echo "--- final state ---"
+          cat "$OUT/state.json" || true
+
+      - name: Run War Room on V11 results
+        if: always()
+        run: |
+          PYTHONPATH=. python -m replay.war_room.run_war_room \
+            --cycles replay_runs/v11_baseline/cycles.jsonl \
+            --data-cache data_cache \
+            --out-dir replay_runs/v11_baseline_warroom \
+            --repo-root . || true
+
+      - name: Upload V11 artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hydra-v11-baseline-results
+          path: |
+            replay_runs/v11_baseline/
+            replay_runs/v11_baseline_warroom/
+
+      - name: Commit V11 results
+        if: always()
+        run: |
+          git config user.name "hydra-v11-bot"
+          git config user.email "hydra-v11-bot@users.noreply.github.com"
+          git add replay_runs/v11_baseline/state.json \
+                  replay_runs/v11_baseline/summary.json \
+                  replay_runs/v11_baseline/DONE \
+                  2>/dev/null || true
+          git add replay_runs/v11_baseline_warroom/*.md \
+                  replay_runs/v11_baseline_warroom/*.json \
+                  2>/dev/null || true
+          if git diff --cached --quiet ; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git commit -m "hydra V11 baseline: backtest + war room"
+          for i in 1 2 3 4 5 ; do
+            git fetch origin main
+            git pull --rebase origin main || git rebase --abort || true
+            if git push origin main ; then exit 0 ; fi
+            sleep 10
+          done
+          echo "V11 push failed."
+          exit 1
