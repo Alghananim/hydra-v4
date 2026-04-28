@@ -30,6 +30,7 @@ from . import shadow_pnl
 from . import hypotheses
 from . import red_team
 from . import report_writer
+from . import chartmind_score_dump
 
 
 def main() -> None:
@@ -64,6 +65,10 @@ def main() -> None:
                             args.out_dir, args.out_dir)
     n_pass = sum(1 for x in probes if x.get("passed"))
     print(f"     probes passed: {n_pass}/{len(probes)}")
+
+    print("[5b/6] V5.1 ChartMind score dump...")
+    cm_summary = chartmind_score_dump.run(args.cycles, args.out_dir)
+    print(f"     chartmind rows parsed: {cm_summary.get('rows_parsed', 0):,}")
 
     print("[6/6] writing final report...")
     report_path = args.repo_root / (

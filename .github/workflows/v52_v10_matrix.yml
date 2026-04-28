@@ -1,0 +1,121 @@
+name: HYDRA V5.2-V10 Matrix — Variant Backtests
+
+# Runs all V5.2 → V10 variants in parallel, each producing its own
+# cycles.jsonl + war room report. Triggered only manually via the
+# Actions UI to control GitHub free-tier minutes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      variants:
+        description: "Comma-separated list of variants (or 'all')"
+        default: "all"
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  variant_backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - v5_2_drop_volatility_normal
+          - v5_3_drop_no_liquidity_sweep
+          - v5_4_lower_a_min
+          - v5_5_combined
+          - v5_6_lift_market_neutral_cap
+          - v5_7_no_lookahead
+          - v6_per_pair_calibration
+          - v7_require_mtf
+          - v8_atr_relative_sltp
+          - v9_hardening
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest pyyaml
+
+      - name: Skip if not selected
+        id: gate
+        run: |
+          if [ "${{ inputs.variants }}" = "all" ] || \
+             echo "${{ inputs.variants }}" | grep -q "${{ matrix.variant }}"; then
+            echo "skip=false" >> $GITHUB_OUTPUT
+          else
+            echo "skip=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run variant backtest
+        if: steps.gate.outputs.skip == 'false'
+        run: |
+          set -e
+          OUT="replay_runs/${{ matrix.variant }}"
+          mkdir -p "$OUT"
+          CHUNK=0
+          MAX_CHUNKS=20
+          while [ ! -f "$OUT/DONE" ] ; do
+            CHUNK=$((CHUNK + 1))
+            if [ "$CHUNK" -gt "$MAX_CHUNKS" ] ; then
+              echo "Hit MAX_CHUNKS=$MAX_CHUNKS without DONE; stopping."
+              break
+            fi
+            echo "=== ${{ matrix.variant }} chunk $CHUNK ==="
+            PYTHONPATH=. python replay/run_variant_backtest.py \
+              --variant "${{ matrix.variant }}" \
+              --output-dir "$OUT" \
+              --time-budget-s 300 \
+              --checkpoint-every 1000
+          done
+
+      - name: Run War Room on this variant
+        if: always() && steps.gate.outputs.skip == 'false'
+        run: |
+          PYTHONPATH=. python -m replay.war_room.run_war_room \
+            --cycles "replay_runs/${{ matrix.variant }}/cycles.jsonl" \
+            --data-cache data_cache \
+            --out-dir "replay_runs/${{ matrix.variant }}_warroom" \
+            --repo-root . || true
+
+      - name: Upload variant artefacts
+        if: always() && steps.gate.outputs.skip == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: hydra-${{ matrix.variant }}-results
+          path: |
+            replay_runs/${{ matrix.variant }}/
+            replay_runs/${{ matrix.variant }}_warroom/
+
+      - name: Commit variant outputs
+        if: always() && steps.gate.outputs.skip == 'false'
+        run: |
+          git config user.name "hydra-variant-bot"
+          git config user.email "hydra-variant-bot@users.noreply.github.com"
+          git add "replay_runs/${{ matrix.variant }}/state.json" \
+                  "replay_runs/${{ matrix.variant }}/summary.json" \
+                  "replay_runs/${{ matrix.variant }}/DONE" \
+                  "replay_runs/${{ matrix.variant }}/variant_describe.json" 2>/dev/null || true
+          git add "replay_runs/${{ matrix.variant }}_warroom/"*.md \
+                  "replay_runs/${{ matrix.variant }}_warroom/"*.json 2>/dev/null || true
+          if git diff --cached --quiet ; then
+            echo "No changes to commit."
+          else
+            git pull --rebase || true
+            git commit -m "hydra ${{ matrix.variant }}: backtest + war room results"
+            git push
+          fi

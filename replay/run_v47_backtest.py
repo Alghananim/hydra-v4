@@ -78,9 +78,28 @@ def load_bars(pair: str) -> list:
 
 
 def cycle_to_record(c) -> dict:
+    """V5.1: include the brain evidence strings (truncated) so the
+    war room can parse internal scores. No behaviour change in the
+    orchestrator — we just stop discarding data we already have.
+
+    Evidence is capped at 1024 chars per brain to keep cycles.jsonl
+    bounded in size. Parsing tolerates truncation.
+    """
+    EVIDENCE_CHAR_CAP = 1024
+
     def bo(b):
         if b is None:
             return None
+        ev_list = list(b.evidence) if b.evidence else []
+        ev_truncated = []
+        budget = EVIDENCE_CHAR_CAP
+        for s in ev_list:
+            s = str(s)
+            if len(s) >= budget:
+                ev_truncated.append(s[:budget])
+                break
+            ev_truncated.append(s)
+            budget -= len(s) + 1  # +1 for separator
         return {
             "brain": b.brain_name,
             "decision": b.decision,
@@ -88,6 +107,7 @@ def cycle_to_record(c) -> dict:
             "data_quality": b.data_quality,
             "should_block": b.should_block,
             "evidence_count": len(b.evidence),
+            "evidence": ev_truncated,  # NEW in V5.1
             "confidence": float(b.confidence),
         }
 
