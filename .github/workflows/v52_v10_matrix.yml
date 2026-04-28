@@ -101,33 +101,62 @@ jobs:
             replay_runs/${{ matrix.variant }}/
             replay_runs/${{ matrix.variant }}_warroom/
 
-      - name: Commit variant outputs (with retry on race)
-        if: always() && steps.gate.outputs.skip == 'false'
+      # Per-variant commit removed — was unreliable due to race conditions
+      # when 10 jobs finish simultaneously. Results are uploaded as artifacts
+      # only. The "harvest" job below runs AFTER all variants and consolidates.
+      - name: Skip commit (handled by harvest job)
+        if: steps.gate.outputs.skip == 'false'
         run: |
-          git config user.name "hydra-variant-bot"
-          git config user.email "hydra-variant-bot@users.noreply.github.com"
-          git add "replay_runs/${{ matrix.variant }}/state.json" \
-                  "replay_runs/${{ matrix.variant }}/summary.json" \
-                  "replay_runs/${{ matrix.variant }}/DONE" \
-                  "replay_runs/${{ matrix.variant }}/variant_describe.json" 2>/dev/null || true
-          git add "replay_runs/${{ matrix.variant }}_warroom/"*.md \
-                  "replay_runs/${{ matrix.variant }}_warroom/"*.json 2>/dev/null || true
+          echo "Per-variant commit skipped. Artifacts uploaded above."
+          echo "The harvest job (sequential) will commit all results."
+
+  harvest:
+    needs: variant_backtest
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download all variant artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./_artifacts/
+
+      - name: Move artefact contents into replay_runs/
+        run: |
+          mkdir -p replay_runs
+          for d in ./_artifacts/hydra-*-results/replay_runs/*/ ; do
+            if [ -d "$d" ]; then
+              name=$(basename "$d")
+              echo "Merging $d -> replay_runs/$name"
+              mkdir -p "replay_runs/$name"
+              cp -r "$d"/. "replay_runs/$name/" || true
+            fi
+          done
+          ls -la replay_runs/ || true
+
+      - name: Commit consolidated results (single sequential commit)
+        run: |
+          git config user.name "hydra-harvest-bot"
+          git config user.email "hydra-harvest-bot@users.noreply.github.com"
+          git add replay_runs/ 2>/dev/null || true
+          # Only track the small files; cycles.jsonl / smartnotebook stay ignored.
           if git diff --cached --quiet ; then
-            echo "No changes to commit."
+            echo "No tracked changes to commit."
             exit 0
           fi
-          git commit -m "hydra ${{ matrix.variant }}: backtest + war room results"
-          # Retry push up to 8 times with rebase on conflict (10 parallel jobs
-          # means race conditions are guaranteed; we accept all of them).
-          for i in 1 2 3 4 5 6 7 8; do
+          git commit -m "hydra matrix harvest: all variant results consolidated"
+          # Single push — no race because no other job runs after this.
+          for i in 1 2 3 4 5; do
             git fetch origin main
             git pull --rebase origin main || git rebase --abort || true
             if git push origin main ; then
-              echo "Push succeeded on attempt $i"
+              echo "Harvest push succeeded on attempt $i"
               exit 0
             fi
-            echo "Push attempt $i failed, retrying after sleep..."
-            sleep $((RANDOM % 30 + 5))
+            sleep 10
           done
-          echo "All 8 push attempts failed."
+          echo "Harvest push failed after 5 attempts."
           exit 1
